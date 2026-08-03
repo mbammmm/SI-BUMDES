@@ -1,0 +1,316 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  username      String   @unique
+  name          String
+  passwordHash  String
+  roleId        String
+  isActive      Boolean  @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  role          Role               @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  auditLogs     AuditLog[]
+  transactions  Transaction[]
+  assets        Asset[]
+  letters       Letter[]
+  archives      ArchiveDocument[]
+  notifications Notification[]
+  approvalSteps ApprovalStep[]     @relation("ApprovalSteps")
+
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  permissions Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  @@map("roles")
+}
+
+model BUMDesProfile {
+  id                    String   @id @default(cuid())
+  name                  String
+  address               String
+  phone                 String?
+  email                 String?
+  nib                   String?
+  registrationNumber    String?
+  logoPath              String?
+  letterheadPath        String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("bumdes_profile")
+}
+
+model UnitUsaha {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  headId      String?
+  startDate   DateTime
+  initialCapital Decimal @db.Decimal(15, 2)
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("unit_usaha")
+}
+
+model ChartOfAccount {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  category    String
+  type        String
+  parentId    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("chart_of_accounts")
+}
+
+model JournalEntry {
+  id            String   @id @default(cuid())
+  entryDate     DateTime
+  description   String
+  reference     String?
+  isPosted      Boolean  @default(false)
+  postedAt      DateTime?
+  createdAt     DateTime @default(now())
+  createdById   String
+  updatedAt     DateTime @updatedAt
+
+  lines         JournalLine[]
+  @@map("journal_entries")
+}
+
+model JournalLine {
+  id              String   @id @default(cuid())
+  journalEntryId  String
+  accountCode     String
+  debit           Decimal  @db.Decimal(15, 2) @default(0)
+  credit          Decimal  @db.Decimal(15, 2) @default(0)
+  description     String?
+  createdAt       DateTime @default(now())
+
+  journalEntry    JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+
+  @@map("journal_lines")
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  transactionDate DateTime
+  unitUsahaId     String
+  type            String
+  amount          Decimal  @db.Decimal(15, 2)
+  accountCode     String
+  description     String
+  proofPath       String?
+  isPosted        Boolean  @default(false)
+  postedAt        DateTime?
+  createdAt       DateTime @default(now())
+  createdById     String
+  updatedAt       DateTime @updatedAt
+
+  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@map("transactions")
+}
+
+model Asset {
+  id              String   @id @default(cuid())
+  name            String
+  category        String
+  acquisitionDate DateTime
+  acquisitionValue Decimal @db.Decimal(15, 2)
+  usefulLife      Int
+  salvageValue    Decimal? @db.Decimal(15, 2)
+  unitUsahaId     String
+  condition       String   @default("baik")
+  photoPath       String?
+  qrCodePath      String?
+  status          String   @default("aktif")
+  currentValue    Decimal? @db.Decimal(15, 2)
+  createdAt       DateTime @default(now())
+  createdById     String
+  updatedAt       DateTime @updatedAt
+
+  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  mutations       AssetMutation[]
+  depSchedules    AssetDepreciationSchedule[]
+
+  @@map("assets")
+}
+
+model AssetMutation {
+  id          String   @id @default(cuid())
+  assetId     String
+  type        String
+  description String
+  fromValue   String?
+  toValue     String?
+  createdAt   DateTime @default(now())
+  createdById String
+
+  asset       Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("asset_mutations")
+}
+
+model AssetDepreciationSchedule {
+  id          String   @id @default(cuid())
+  assetId     String
+  period      String
+  amount      Decimal  @db.Decimal(15, 2)
+  isAccrued   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  asset       Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@map("asset_depreciation_schedules")
+}
+
+model LetterTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  content     String
+  numberingFormat String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("letter_templates")
+}
+
+model Letter {
+  id              String   @id @default(cuid())
+  number          String   @unique
+  subject         String
+  type            String
+  status          String   @default("draft")
+  content         String?
+  outgoingDate    DateTime?
+  incomingDate    DateTime?
+  sender          String?
+  recipient       String?
+  pdfPath         String?
+  createdAt       DateTime @default(now())
+  createdById     String
+  updatedAt       DateTime @updatedAt
+
+  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@map("letters")
+}
+
+model ApprovalStep {
+  id          String   @id @default(cuid())
+  letterId    String
+  stepOrder   Int
+  approverId  String
+  status      String   @default("pending")
+  notes       String?
+  decidedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  approver    User     @relation("ApprovalSteps", fields: [approverId], references: [id], onDelete: Restrict)
+
+  @@map("approval_steps")
+}
+
+model DocumentCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  retentionDays Int?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("document_categories")
+}
+
+model ArchiveDocument {
+  id              String   @id @default(cuid())
+  title           String
+  categoryId      String
+  documentDate    DateTime
+  tags            String[]
+  filePath        String
+  relatedLetterId String?
+  relatedTransactionId String?
+  createdAt       DateTime @default(now())
+  createdById     String
+  updatedAt       DateTime @updatedAt
+
+  createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@map("archive_documents")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  message     String
+  type        String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String
+  entityType  String
+  entityId    String
+  changes     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@map("audit_logs")
+}
+
+model SyncQueue {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String
+  action      String
+  payload     Json
+  attempts    Int      @default(0)
+  lastError   String?
+  createdAt   DateTime @default(now())
+  processedAt DateTime?
+
+  @@map("sync_queue")
+}

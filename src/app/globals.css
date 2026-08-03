@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #0D7C66;
+  --color-primary-50: #E6F5F1;
+  --color-primary-100: #CCEBE3;
+  --color-primary-200: #99D7C7;
+  --color-primary-300: #66C3AB;
+  --color-primary-400: #33AF8F;
+  --color-primary-500: #0D7C66;
+  --color-primary-600: #0A634F;
+  --color-primary-700: #074A3A;
+  --color-primary-800: #043125;
+  --color-primary-900: #02190F;
+
+  --color-secondary: #F2B705;
+  --color-secondary-50: #FFF9E6;
+  --color-secondary-100: #FFF3CC;
+  --color-secondary-200: #FFE799;
+  --color-secondary-300: #FFDB66;
+  --color-secondary-400: #FFCF33;
+  --color-secondary-500: #F2B705;
+  --color-secondary-600: #C28F04;
+  --color-secondary-700: #926703;
+  --color-secondary-800: #614002;
+  --color-secondary-900: #311801;
+
+  --color-accent: #F28C28;
+  --color-accent-50: #FEF3E8;
+  --color-accent-100: #FDE7D1;
+  --color-accent-200: #FBCFA3;
+  --color-accent-300: #F9B775;
+  --color-accent-400: #F79F47;
+  --color-accent-500: #F28C28;
+  --color-accent-600: #C26E20;
+  --color-accent-700: #925418;
+  --color-accent-800: #623A10;
+  --color-accent-900: #311E08;
+}
+
+@layer base {
+  * {
+    border-color: #e5e7eb;
+  }
+  body {
+    background-color: #ffffff;
+    color: #171717;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  input, textarea, select {
+    color: #171717;
+  }
+  input::placeholder, textarea::placeholder {
+    color: #9ca3af;
+  }
+}
