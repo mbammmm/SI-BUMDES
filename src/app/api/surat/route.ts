@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { hasPermission, type Permission } from "@/lib/rbac";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
