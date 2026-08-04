@@ -16,12 +16,11 @@ export const viewport = {
   userScalable: false,
 } as const;
 
-export const themeColor = "#0D7C66";
-
 export const metadata: Metadata = {
   title: "SI-BUMDes Maju Langgeng",
   description: "Sistem Informasi Terpadu BUMDes",
   manifest: "/manifest.json",
+  themeColor: "#0D7C66",
 };
 
 export default function RootLayout({
