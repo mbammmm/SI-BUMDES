@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { usePermission } from "@/hooks/use-permission";
+import { emitRefresh } from "@/lib/refresh";
+import { useRefreshOnEvent } from "@/hooks/use-refresh-on-event";
+import { offlineFetch } from "@/lib/offline-fetch";
 
 type Template = {
   id: string;
@@ -34,23 +37,33 @@ export default function ArsipPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/arsip").then((res) => res.json()),
-      fetch("/api/arsip/kategori").then((res) => res.json()),
-    ]).then(([docJson, catJson]) => {
+  async function loadData() {
+    try {
+      const [docJson, catJson] = await Promise.all([
+        fetch("/api/arsip").then((res) => res.json()),
+        fetch("/api/arsip/kategori").then((res) => res.json()),
+      ]);
       setDocuments(docJson.data || []);
       setCategories(catJson.data || []);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    } finally {
       setDataLoading(false);
-    });
+    }
+  }
+
+  useEffect(() => {
+    loadData();
   }, []);
+
+  useRefreshOnEvent(loadData);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setMessage("");
 
-    const res = await fetch("/api/arsip", {
+    const res = await offlineFetch("/api/arsip", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -60,8 +73,6 @@ export default function ArsipPage() {
     });
 
     if (res.ok) {
-      const json = await res.json();
-      setDocuments([json.data, ...documents]);
       setForm({
         title: "",
         categoryId: "",
@@ -73,6 +84,8 @@ export default function ArsipPage() {
       });
       setShowForm(false);
       setMessage("Dokumen berhasil disimpan");
+      await loadData();
+      emitRefresh();
     } else {
       setMessage("Gagal menyimpan dokumen");
     }

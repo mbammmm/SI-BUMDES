@@ -16,6 +16,7 @@ async function main() {
         letters: "crud",
         archives: "crud",
         reports: "read",
+        notifications: "crud",
       },
     },
     {
@@ -28,6 +29,7 @@ async function main() {
         letters: "approve_sign",
         archives: "read",
         reports: "read",
+        notifications: "read",
       },
     },
     {
@@ -40,6 +42,7 @@ async function main() {
         letters: "none",
         archives: "read",
         reports: "read",
+        notifications: "read",
       },
     },
     {
@@ -52,6 +55,7 @@ async function main() {
         letters: "crud",
         archives: "crud",
         reports: "read",
+        notifications: "read",
       },
     },
     {
@@ -64,6 +68,7 @@ async function main() {
         letters: "read",
         archives: "read",
         reports: "read",
+        notifications: "read",
       },
     },
     {
@@ -76,6 +81,7 @@ async function main() {
         letters: "input",
         archives: "upload",
         reports: "read",
+        notifications: "read",
       },
     },
     {
@@ -88,6 +94,7 @@ async function main() {
         letters: "read",
         archives: "read",
         reports: "read",
+        notifications: "read",
       },
     },
   ];
@@ -95,7 +102,7 @@ async function main() {
   for (const role of roles) {
     await prisma.role.upsert({
       where: { name: role.name },
-      update: {},
+      update: { permissions: role.permissions },
       create: role,
     });
   }

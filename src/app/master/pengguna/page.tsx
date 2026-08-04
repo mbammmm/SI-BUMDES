@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Edit } from "lucide-react";
-import { canAccess, type PermissionLevel } from "@/lib/rbac";
+import { useRouter } from "next/navigation";
+import { usePermission } from "@/hooks/use-permission";
+import { offlineFetch } from "@/lib/offline-fetch";
 
 type User = {
   id: string;
@@ -23,9 +25,11 @@ type Role = {
 };
 
 export default function PenggunaPage() {
+  const router = useRouter();
+  const { allowed, canWrite, loading } = usePermission({ module: "users", minLevel: "read" });
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form, setForm] = useState({
@@ -47,7 +51,7 @@ export default function PenggunaPage() {
     ]).then(([userJson, roleJson]) => {
       setUsers(userJson.data || []);
       setRoles(roleJson.data || []);
-      setLoading(false);
+      setDataLoading(false);
     });
   }, []);
 
@@ -87,7 +91,7 @@ export default function PenggunaPage() {
     const url = editingUser ? `/api/master/pengguna/${form.id}` : "/api/master/pengguna";
     const method = editingUser ? "PUT" : "POST";
 
-    const res = await fetch(url, {
+    const res = await offlineFetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -111,26 +115,29 @@ export default function PenggunaPage() {
 
   async function deleteUser(id: string) {
     if (!confirm("Yakin ingin menghapus pengguna ini?")) return;
-    await fetch(`/api/master/pengguna/${id}`, { method: "DELETE" });
+    await offlineFetch(`/api/master/pengguna/${id}`, { method: "DELETE" });
     setUsers(users.filter((u) => u.id !== id));
   }
 
-  if (loading) return <div className="p-6">Memuat...</div>;
+  if (dataLoading) return <div className="p-6">Memuat...</div>;
+  if (!allowed) return null;
 
   return (
     <div className="p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Manajemen Pengguna</h1>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-600 transition"
-        >
-          <Plus size={16} />
-          Tambah Pengguna
-        </button>
+        {canWrite && (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-600 transition"
+          >
+            <Plus size={16} />
+            Tambah Pengguna
+          </button>
+        )}
       </div>
 
-      {showForm && (
+      {canWrite && showForm && (
         <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>

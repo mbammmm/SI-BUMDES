@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePermission } from "@/hooks/use-permission";
+import { offlineFetch } from "@/lib/offline-fetch";
 
 type Profile = {
   id: string;
@@ -42,7 +43,7 @@ export default function ProfilPage() {
     setSaving(true);
     setMessage("");
 
-    const res = await fetch("/api/master/profil", {
+    const res = await offlineFetch("/api/master/profil", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),

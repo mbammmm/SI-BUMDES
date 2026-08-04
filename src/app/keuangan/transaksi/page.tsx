@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { Plus, Wallet } from "lucide-react";
 import { usePermission } from "@/hooks/use-permission";
+import { emitRefresh } from "@/lib/refresh";
+import { useRefreshOnEvent } from "@/hooks/use-refresh-on-event";
+import { offlineFetch } from "@/lib/offline-fetch";
 
 type Transaction = {
   id: string;
@@ -42,25 +45,35 @@ export default function TransaksiPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/keuangan/transaksi").then((res) => res.json()),
-      fetch("/api/master/unit-usaha").then((res) => res.json()),
-      fetch("/api/master/coa").then((res) => res.json()),
-    ]).then(([txJson, unitJson, coaJson]) => {
+  async function loadData() {
+    try {
+      const [txJson, unitJson, coaJson] = await Promise.all([
+        fetch("/api/keuangan/transaksi").then((res) => res.json()),
+        fetch("/api/master/unit-usaha").then((res) => res.json()),
+        fetch("/api/master/coa").then((res) => res.json()),
+      ]);
       setTransactions(txJson.data || []);
       setUnits(unitJson.data || []);
       setAccounts(coaJson.data || []);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    } finally {
       setDataLoading(false);
-    });
+    }
+  }
+
+  useEffect(() => {
+    loadData();
   }, []);
+
+  useRefreshOnEvent(loadData);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setMessage("");
 
-    const res = await fetch("/api/keuangan/transaksi", {
+    const res = await offlineFetch("/api/keuangan/transaksi", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -68,7 +81,7 @@ export default function TransaksiPage() {
 
     if (res.ok) {
       const json = await res.json();
-      setTransactions([json.data, ...transactions]);
+      setMessage("Transaksi berhasil disimpan");
       setForm({
         transactionDate: new Date().toISOString().split("T")[0],
         unitUsahaId: form.unitUsahaId,
@@ -77,7 +90,8 @@ export default function TransaksiPage() {
         accountCode: "",
         description: "",
       });
-      setMessage("Transaksi berhasil disimpan");
+      await loadData();
+      emitRefresh();
     } else {
       setMessage("Gagal menyimpan transaksi");
     }

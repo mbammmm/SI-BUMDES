@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Edit } from "lucide-react";
+import { usePermission } from "@/hooks/use-permission";
+import { offlineFetch } from "@/lib/offline-fetch";
 
 type Role = {
   id: string;
@@ -31,8 +33,9 @@ const levelLabels: Record<string, string> = {
 };
 
 export default function RolesPage() {
+  const { allowed, canWrite, loading } = usePermission({ module: "users", minLevel: "read" });
   const [roles, setRoles] = useState<Role[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [form, setForm] = useState({
@@ -61,7 +64,7 @@ export default function RolesPage() {
       .then((res) => res.json())
       .then((json) => {
         setRoles(json.data || []);
-        setLoading(false);
+        setDataLoading(false);
       });
   }, []);
 
@@ -99,7 +102,7 @@ export default function RolesPage() {
     const url = editingRole ? `/api/master/roles/${form.id}` : "/api/master/roles";
     const method = editingRole ? "PUT" : "POST";
 
-    const res = await fetch(url, {
+    const res = await offlineFetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -123,26 +126,29 @@ export default function RolesPage() {
 
   async function deleteRole(id: string) {
     if (!confirm("Yakin ingin menghapus peran ini?")) return;
-    await fetch(`/api/master/roles/${id}`, { method: "DELETE" });
+    await offlineFetch(`/api/master/roles/${id}`, { method: "DELETE" });
     setRoles(roles.filter((r) => r.id !== id));
   }
 
-  if (loading) return <div className="p-6">Memuat...</div>;
+  if (dataLoading) return <div className="p-6">Memuat...</div>;
+  if (!allowed) return null;
 
   return (
     <div className="p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Manajemen Peran</h1>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-600 transition"
-        >
-          <Plus size={16} />
-          Tambah Peran
-        </button>
+        {canWrite && (
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-600 transition"
+          >
+            <Plus size={16} />
+            Tambah Peran
+          </button>
+        )}
       </div>
 
-      {showForm && (
+      {canWrite && showForm && (
         <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>

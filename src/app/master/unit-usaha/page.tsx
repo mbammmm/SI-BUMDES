@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { usePermission } from "@/hooks/use-permission";
+import { offlineFetch } from "@/lib/offline-fetch";
 
 type UnitUsaha = {
   id: string;
@@ -41,7 +42,7 @@ export default function UnitUsahaPage() {
     setSaving(true);
     setMessage("");
 
-    const res = await fetch("/api/master/unit-usaha", {
+    const res = await offlineFetch("/api/master/unit-usaha", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -60,7 +61,7 @@ export default function UnitUsahaPage() {
 
   async function deleteUnit(id: string) {
     if (!confirm("Yakin ingin menghapus unit usaha ini?")) return;
-    await fetch(`/api/master/unit-usaha/${id}`, { method: "DELETE" });
+    await offlineFetch(`/api/master/unit-usaha/${id}`, { method: "DELETE" });
     setUnits(units.filter((u) => u.id !== id));
   }
 

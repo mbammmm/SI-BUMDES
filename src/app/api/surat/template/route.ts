@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         name: body.name,
         type: body.type,
         content: body.content,
-        numberingFormat: body.numberingFormat,
+        numberingFormat: body.numberingFormat || null,
       },
     });
 

@@ -1,8 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Plus, Mail, FileText, CheckCircle, XCircle, Clock } from "lucide-react";
 import { usePermission } from "@/hooks/use-permission";
+import { notifyRole } from "@/lib/notifications";
+import { emitRefresh } from "@/lib/refresh";
+import { useRefreshOnEvent } from "@/hooks/use-refresh-on-event";
+import { offlineFetch } from "@/lib/offline-fetch";
+
+type LetterTemplate = {
+  id: string;
+  name: string;
+  type: string;
+  content: string;
+  numberingFormat: string | null;
+};
 
 type Letter = {
   id: string;
@@ -22,6 +34,7 @@ type Approval = {
   id: string;
   stepOrder: number;
   status: string;
+  approverId: string;
   approver: { name: string };
 };
 
@@ -42,28 +55,43 @@ export default function SuratPage() {
     firstApproverId: "",
   });
   const [users, setUsers] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<LetterTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [selectedLetter, setSelectedLetter] = useState<Letter | null>(null);
   const [approvals, setApprovals] = useState<Approval[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      fetch(`/api/surat?type=${tab}`).then((res) => res.json()),
-      fetch("/api/master/pengguna").then((res) => res.json()),
-    ]).then(([letterJson, userJson]) => {
+  const loadData = useCallback(async () => {
+    try {
+      const [letterJson, userJson, templateJson] = await Promise.all([
+        fetch(`/api/surat?type=${tab}`).then((res) => res.json()),
+        fetch("/api/master/pengguna").then((res) => res.json()),
+        fetch("/api/surat/template").then((res) => res.json()),
+      ]);
       setLetters(letterJson.data || []);
       setUsers(userJson.data || []);
+      setTemplates(templateJson.data || []);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    } finally {
       setDataLoading(false);
-    });
+    }
   }, [tab]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useRefreshOnEvent(loadData);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setMessage("");
 
-    const res = await fetch("/api/surat", {
+    const res = await offlineFetch("/api/surat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -71,7 +99,6 @@ export default function SuratPage() {
 
     if (res.ok) {
       const json = await res.json();
-      setLetters([json.data, ...letters]);
       setForm({
         subject: "",
         type: tab,
@@ -84,6 +111,17 @@ export default function SuratPage() {
       });
       setShowForm(false);
       setMessage("Surat berhasil disimpan dengan nomor otomatis");
+      
+      if (tab === "keluar" && form.firstApproverId) {
+        const approverRes = await fetch(`/api/master/pengguna`);
+        const approverJson = await approverRes.json();
+        const approver = (approverJson.data || []).find((u: any) => u.id === form.firstApproverId);
+        const approverRole = approver?.role?.name || "Direktur/Ketua BUMDes";
+        await notifyRole(approverRole, "Surat Menunggu Approval", `Surat "${form.subject}" memerlukan approval Anda.`, "approval");
+      }
+      
+      await loadData();
+      emitRefresh();
     } else {
       const data = await res.json();
       setMessage(data.error || "Gagal menyimpan surat");
@@ -93,29 +131,44 @@ export default function SuratPage() {
 
   async function viewApprovals(letter: Letter) {
     setSelectedLetter(letter);
-    const res = await fetch(`/api/surat/approval?letterId=${letter.id}`);
-    const json = await res.json();
-    setApprovals(json.data || []);
+    const [approvalRes, authRes] = await Promise.all([
+      fetch(`/api/surat/approval?letterId=${letter.id}`),
+      fetch("/api/auth/me"),
+    ]);
+    const approvalJson = await approvalRes.json();
+    const authJson = await authRes.ok ? await authRes.json() : { user: null };
+    setApprovals(approvalJson.data || []);
+    setCurrentUserId(authJson.user?.id || null);
   }
 
   async function approveStep(approvalId: string, status: "approved" | "rejected", notes: string) {
-    await fetch("/api/surat/approval", {
+    const approvalRes = await fetch(`/api/surat/approval?letterId=${selectedLetter?.id}`);
+    const approvalJson = await approvalRes.json();
+    const approvals = approvalJson.data || [];
+    const currentApproval = approvals.find((a: any) => a.id === approvalId);
+    const approverId = currentApproval?.approverId;
+
+    let approverRole = "Direktur/Ketua BUMDes";
+    if (approverId) {
+      const userRes = await fetch(`/api/master/pengguna`);
+      const userJson = await userRes.json();
+      const approver = (userJson.data || []).find((u: any) => u.id === approverId);
+      approverRole = approver?.role?.name || approverRole;
+    }
+
+    await offlineFetch("/api/surat/approval", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: approvalId, status, notes }),
     });
 
     if (selectedLetter) {
-      const res = await fetch(`/api/surat/approval?letterId=${selectedLetter.id}`);
-      const json = await res.json();
-      setApprovals(json.data || []);
+      const statusText = status === "approved" ? "disetujui" : "ditolak";
+      await notifyRole(approverRole, `Surat ${statusText}`, `Surat "${selectedLetter.subject}" telah ${statusText} oleh approver.`, status === "approved" ? "success" : "warning");
     }
 
-    fetch(`/api/surat?type=${tab}`)
-      .then((res) => res.json())
-      .then((json) => {
-        setLetters(json.data || []);
-      });
+    await loadData();
+    emitRefresh();
   }
 
   if (dataLoading) return <div className="p-6">Memuat...</div>;
@@ -153,6 +206,34 @@ export default function SuratPage() {
 
       {canWrite && showForm && (
         <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-1">Template Surat (opsional)</label>
+            <select
+              value={selectedTemplateId}
+              onChange={(e) => {
+                const template = templates.find((t) => t.id === e.target.value);
+                setSelectedTemplateId(e.target.value);
+              if (template) {
+                setForm({
+                  ...form,
+                  subject: template.name,
+                  content: template.content,
+                  type: template.type as "keluar" | "masuk",
+                });
+                if (tab !== (template.type as "keluar" | "masuk")) {
+                  setTab(template.type as "keluar" | "masuk");
+                }
+              }
+              }}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            >
+              <option value="">Pilih template...</option>
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>{template.name}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Perihal</label>
@@ -321,7 +402,7 @@ export default function SuratPage() {
                         {getStatusLabel(approval.status)}
                       </span>
                     </div>
-                    {approval.status === "pending" && (
+                    {approval.status === "pending" && currentUserId === approval.approverId && (
                       <div className="flex gap-2 mt-3">
                         <button
                           onClick={() => approveStep(approval.id, "approved", "")}

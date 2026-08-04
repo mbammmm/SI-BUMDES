@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { usePermission } from "@/hooks/use-permission";
+import { useRefreshOnEvent } from "@/hooks/use-refresh-on-event";
 
 type NeracaData = {
   asOfDate: string;
@@ -11,23 +13,34 @@ type NeracaData = {
 };
 
 export default function NeracaPage() {
+  const { allowed, loading } = usePermission({ module: "accounting", minLevel: "read" });
   const [data, setData] = useState<NeracaData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [asOfDate, setAsOfDate] = useState("");
 
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (asOfDate) params.set("asOfDate", asOfDate);
+  const loadData = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      if (asOfDate) params.set("asOfDate", asOfDate);
 
-    fetch(`/api/keuangan/laporan/neraca?${params.toString()}`)
-      .then((res) => res.json())
-      .then((json) => {
-        setData(json);
-        setLoading(false);
-      });
+      const res = await fetch(`/api/keuangan/laporan/neraca?${params.toString()}`);
+      const json = await res.json();
+      setData(json);
+    } catch (error) {
+      console.error("Failed to load neraca:", error);
+    } finally {
+      setDataLoading(false);
+    }
   }, [asOfDate]);
 
-  if (loading) return <div className="p-6">Memuat...</div>;
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useRefreshOnEvent(loadData);
+
+  if (dataLoading) return <div className="p-6">Memuat...</div>;
+  if (!allowed) return null;
 
   return (
     <div className="p-6 max-w-4xl">

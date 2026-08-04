@@ -41,3 +41,5 @@ lerna-debug.log*
 *.log
 coverage
 .nyc_output
+tsconfig.tsbuildinfo
+scripts

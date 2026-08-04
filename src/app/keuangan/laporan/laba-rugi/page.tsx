@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePermission } from "@/hooks/use-permission";
 
 type LabaRugiData = {
   startDate: string;
@@ -11,8 +12,9 @@ type LabaRugiData = {
 };
 
 export default function LabaRugiPage() {
+  const { allowed, loading } = usePermission({ module: "accounting", minLevel: "read" });
   const [data, setData] = useState<LabaRugiData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -25,11 +27,12 @@ export default function LabaRugiPage() {
       .then((res) => res.json())
       .then((json) => {
         setData(json);
-        setLoading(false);
+        setDataLoading(false);
       });
   }, [startDate, endDate]);
 
-  if (loading) return <div className="p-6">Memuat...</div>;
+  if (dataLoading) return <div className="p-6">Memuat...</div>;
+  if (!allowed) return null;
 
   return (
     <div className="p-6 max-w-4xl">

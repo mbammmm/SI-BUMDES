@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { usePermission } from "@/hooks/use-permission";
+import { offlineFetch } from "@/lib/offline-fetch";
 
 type COA = {
   id: string;
@@ -40,7 +41,7 @@ export default function CoaPage() {
     setSaving(true);
     setMessage("");
 
-    const res = await fetch("/api/master/coa", {
+    const res = await offlineFetch("/api/master/coa", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),

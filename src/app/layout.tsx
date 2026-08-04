@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
+import SyncInitializer from "@/components/sync-initializer";
+import OfflineIndicator from "@/components/offline-indicator";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -10,10 +12,11 @@ export const metadata: Metadata = {
   description: "Sistem Informasi Terpadu BUMDes",
   manifest: "/manifest.json",
   themeColor: "#0D7C66",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "SI-BUMDes",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
   },
 };
 
@@ -29,6 +32,29 @@ export default function RootLayout({
           <Navbar />
           <main className="flex-1">{children}</main>
         </div>
+        <SyncInitializer />
+        <OfflineIndicator />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+                if (location.hostname === 'localhost') {
+                  navigator.serviceWorker.getRegistration().then(function(reg) {
+                    if (reg) { reg.unregister(); }
+                  });
+                } else {
+                  window.addEventListener('load', function() {
+                    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                      reg.updateViaCache = 'none';
+                    }).catch(function(err) {
+                      console.log('ServiceWorker registration failed:', err);
+                    });
+                  });
+                }
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

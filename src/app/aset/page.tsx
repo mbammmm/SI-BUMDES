@@ -4,6 +4,9 @@ import { useEffect, useState, useRef } from "react";
 import { Plus, Package, QrCode } from "lucide-react";
 import QRCode from "qrcode";
 import { usePermission } from "@/hooks/use-permission";
+import { emitRefresh } from "@/lib/refresh";
+import { useRefreshOnEvent } from "@/hooks/use-refresh-on-event";
+import { offlineFetch } from "@/lib/offline-fetch";
 
 type Asset = {
   id: string;
@@ -46,16 +49,26 @@ export default function AsetPage() {
   const [qrAsset, setQrAsset] = useState<Asset | null>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/aset").then((res) => res.json()),
-      fetch("/api/master/unit-usaha").then((res) => res.json()),
-    ]).then(([assetJson, unitJson]) => {
+  async function loadData() {
+    try {
+      const [assetJson, unitJson] = await Promise.all([
+        fetch("/api/aset").then((res) => res.json()),
+        fetch("/api/master/unit-usaha").then((res) => res.json()),
+      ]);
       setAssets(assetJson.data || []);
       setUnits(unitJson.data || []);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    } finally {
       setDataLoading(false);
-    });
+    }
+  }
+
+  useEffect(() => {
+    loadData();
   }, []);
+
+  useRefreshOnEvent(loadData);
 
   useEffect(() => {
     if (qrAsset && qrCanvasRef.current) {
@@ -72,15 +85,13 @@ export default function AsetPage() {
     setSaving(true);
     setMessage("");
 
-    const res = await fetch("/api/aset", {
+    const res = await offlineFetch("/api/aset", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
 
     if (res.ok) {
-      const json = await res.json();
-      setAssets([json.data, ...assets]);
       setForm({
         name: "",
         category: "",
@@ -93,6 +104,8 @@ export default function AsetPage() {
       });
       setShowForm(false);
       setMessage("Aset berhasil ditambah");
+      await loadData();
+      emitRefresh();
     } else {
       const data = await res.json().catch(() => ({ error: "Gagal menambah aset" }));
       setMessage(data.error || "Gagal menambah aset");

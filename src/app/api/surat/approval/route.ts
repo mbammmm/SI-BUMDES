@@ -64,11 +64,26 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
     const body = await request.json();
     const { id, status, notes } = body;
 
     if (!id) {
       return NextResponse.json({ error: "ID diperlukan" }, { status: 400 });
+    }
+
+    const existing = await prisma.approvalStep.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Approval tidak ditemukan" }, { status: 404 });
+    }
+
+    if (existing.approverId !== user!.id) {
+      return NextResponse.json({ error: "Tidak memiliki akses untuk approval ini" }, { status: 403 });
     }
 
     const approval = await prisma.approvalStep.update({
@@ -90,30 +105,24 @@ export async function PUT(request: Request) {
     });
 
     if (status === "approved") {
-      const letter = await prisma.letter.findUnique({
-        where: { id: approval.letterId },
+      const pendingCount = await prisma.approvalStep.count({
+        where: {
+          letterId: existing.letterId,
+          status: "pending",
+        },
       });
 
-      if (letter) {
-        const pendingCount = await prisma.approvalStep.count({
-          where: {
-            letterId: letter.id,
-            status: "pending",
-          },
+      if (pendingCount === 0) {
+        await prisma.letter.update({
+          where: { id: existing.letterId },
+          data: { status: "approved" },
         });
-
-        if (pendingCount === 0) {
-          await prisma.letter.update({
-            where: { id: letter.id },
-            data: { status: "approved" },
-          });
-        }
       }
     }
 
     if (status === "rejected") {
       await prisma.letter.update({
-        where: { id: approval.letterId },
+        where: { id: existing.letterId },
         data: { status: "rejected" },
       });
     }

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { BookOpen } from "lucide-react";
+import { usePermission } from "@/hooks/use-permission";
+import { useRefreshOnEvent } from "@/hooks/use-refresh-on-event";
 
 type JournalEntry = {
   id: string;
@@ -21,19 +23,30 @@ type JournalLine = {
 };
 
 export default function JurnalPage() {
+  const { allowed, loading } = usePermission({ module: "accounting", minLevel: "read" });
   const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
+
+  async function loadData() {
+    try {
+      const res = await fetch("/api/keuangan/jurnal");
+      const json = await res.json();
+      setEntries(json.data || []);
+    } catch (error) {
+      console.error("Failed to load jurnal:", error);
+    } finally {
+      setDataLoading(false);
+    }
+  }
 
   useEffect(() => {
-    fetch("/api/keuangan/jurnal")
-      .then((res) => res.json())
-      .then((json) => {
-        setEntries(json.data || []);
-        setLoading(false);
-      });
+    loadData();
   }, []);
 
-  if (loading) return <div className="p-6">Memuat...</div>;
+  useRefreshOnEvent(loadData);
+
+  if (dataLoading) return <div className="p-6">Memuat...</div>;
+  if (!allowed) return null;
 
   return (
     <div className="p-6 max-w-5xl">

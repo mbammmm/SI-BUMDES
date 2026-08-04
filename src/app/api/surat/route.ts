@@ -28,10 +28,10 @@ export async function GET(request: Request) {
   }
 }
 
-async function generateLetterNumber(type: string, templateId?: string): Promise<string> {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
+async function generateLetterNumber(type: string, templateId?: string, letterDate?: string): Promise<string> {
+  const baseDate = letterDate ? new Date(letterDate) : new Date();
+  const year = baseDate.getFullYear();
+  const month = String(baseDate.getMonth() + 1).padStart(2, "0");
 
   if (type === "keluar") {
     const count = prisma.letter.count({
@@ -86,7 +86,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { type, subject, content, outgoingDate, incomingDate, sender, recipient, templateId } = body;
 
-    const number = await generateLetterNumber(type, templateId);
+    const letterDate = type === "keluar" ? outgoingDate : incomingDate;
+    const number = await generateLetterNumber(type, templateId, letterDate);
 
     const letter = await prisma.letter.create({
       data: {

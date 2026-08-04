@@ -16,7 +16,9 @@ export type Permission =
   | "archives:crud"
   | "archives:upload"
   | "archives:read"
-  | "reports:read";
+  | "reports:read"
+  | "notifications:crud"
+  | "notifications:read";
 
 export type Module =
   | "users"
@@ -24,7 +26,8 @@ export type Module =
   | "assets"
   | "letters"
   | "archives"
-  | "reports";
+  | "reports"
+  | "notifications";
 
 export type PermissionLevel = "crud" | "read_approve" | "input" | "read" | "none" | "upload" | "approve" | "approve_sign";
 
@@ -35,6 +38,7 @@ const permissionMap: Record<string, string[]> = {
   letters: ["letters:crud", "letters:approve_sign", "letters:input", "letters:read"],
   archives: ["archives:crud", "archives:upload", "archives:read"],
   reports: ["reports:read"],
+  notifications: ["notifications:crud", "notifications:read"],
 };
 
 export function getPermissions(rolePermissions: Record<string, any>): string[] {
