@@ -7,17 +7,21 @@ import OfflineIndicator from "@/components/offline-indicator";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const runtime = "nodejs";
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+} as const;
+
+export const themeColor = "#0D7C66";
+
 export const metadata: Metadata = {
   title: "SI-BUMDes Maju Langgeng",
   description: "Sistem Informasi Terpadu BUMDes",
   manifest: "/manifest.json",
-  themeColor: "#0D7C66",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
 };
 
 export default function RootLayout({
