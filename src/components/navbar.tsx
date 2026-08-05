@@ -3,7 +3,24 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, LayoutDashboard, Building2, Factory, BookOpen, Wallet, FileText, Package, BarChart3, Mail, Archive, Users, Bell, PieChart } from "lucide-react";
+import {
+  LogOut,
+  LayoutDashboard,
+  Building2,
+  Factory,
+  BookOpen,
+  Wallet,
+  FileText,
+  Package,
+  BarChart3,
+  Mail,
+  Archive,
+  Users,
+  Bell,
+  PieChart,
+  Menu,
+  X,
+} from "lucide-react";
 
 type User = {
   id: string;
@@ -37,6 +54,7 @@ export default function Navbar() {
   const [ready, setReady] = useState(false);
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -72,16 +90,16 @@ export default function Navbar() {
         // ignore notification errors
       }
 
-    setUser(authJson?.user || null);
-    setReady(true);
-  }
+      setUser(authJson?.user || null);
+      setReady(true);
+    }
 
-  loadUser();
+    loadUser();
 
-  return () => {
-    mounted = false;
-  };
-}, []);
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const isLoginPage = pathname === "/login";
 
@@ -123,22 +141,27 @@ export default function Navbar() {
   const visibleMenuItems = ready ? menuItems.filter((item) => hasAccess(item.href)) : menuItems;
 
   return (
-    <nav className="bg-primary text-white px-6 py-3">
-      <div className="flex items-center justify-between">
+    <header className="bg-primary text-white shadow-md sticky top-0 z-50">
+      {/* Desktop navbar */}
+      <nav className="hidden md:flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-3">
           <img
             src="/images/logo.png"
             alt="Logo BUMDes"
             className="h-8 w-auto"
           />
-          <span className="font-semibold text-lg hidden sm:block">
-            SI-BUMDes Maju Langgeng
-          </span>
+          <span className="font-semibold text-lg">SI-BUMDes Maju Langgeng</span>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 overflow-x-auto">
           {visibleMenuItems.map((item) => (
-            <NavLink key={item.href} href={item.href} icon={item.icon} label={item.label} badge={item.badge} />
+            <NavLink
+              key={item.href}
+              href={item.href}
+              icon={item.icon}
+              label={item.label}
+              badge={item.badge}
+            />
           ))}
           <form action="/api/auth/logout" method="POST">
             <button
@@ -146,23 +169,124 @@ export default function Navbar() {
               className="flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-1.5 rounded transition ml-2"
             >
               <LogOut size={16} />
-              <span className="hidden sm:inline">Keluar</span>
+              <span>Keluar</span>
             </button>
           </form>
         </div>
+      </nav>
+
+      {/* Mobile navbar with hamburger */}
+      <div className="md:hidden flex items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-3">
+          <img
+            src="/images/logo.png"
+            alt="Logo BUMDes"
+            className="h-8 w-auto"
+          />
+          <span className="font-semibold text-lg">SI-BUMDes</span>
+        </div>
+
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="p-2 rounded hover:bg-primary/80 transition"
+          aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
+        >
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </div>
-    </nav>
+
+      {/* Mobile menu dropdown */}
+      {mobileOpen && (
+        <div className="md:hidden bg-primary border-t border-white/20 max-h-[70vh] overflow-y-auto">
+          <div className="px-2 py-2 space-y-1">
+            {visibleMenuItems.map((item) => (
+              <MobileNavLink
+                key={item.href}
+                href={item.href}
+                icon={item.icon}
+                label={item.label}
+                badge={item.badge}
+                onClick={() => setMobileOpen(false)}
+              />
+            ))}
+            <form action="/api/auth/logout" method="POST" className="-mx-2">
+              <button
+                type="submit"
+                className="w-full flex items-center gap-3 text-sm hover:bg-primary/80 px-3 py-2.5 rounded transition"
+              >
+                <LogOut size={16} />
+                <span>Keluar</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
 
-function NavLink({ href, icon, label, badge }: { href: string; icon: React.ReactNode; label: string; badge?: number }) {
+function NavLink({
+  href,
+  icon,
+  label,
+  badge,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  badge?: number;
+}) {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
   return (
     <Link
       href={href}
-      className="flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-1.5 rounded transition relative"
+      className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded transition relative ${
+        isActive
+          ? "bg-white/20 font-medium"
+          : "hover:bg-primary/80"
+      }`}
     >
       {icon}
-      <span className="hidden md:inline">{label}</span>
+      <span>{label}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+          {badge > 9 ? "9+" : badge}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function MobileNavLink({
+  href,
+  icon,
+  label,
+  badge,
+  onClick,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  badge?: number;
+  onClick: () => void;
+}) {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className={`flex items-center gap-3 text-sm px-3 py-2.5 rounded transition relative ${
+        isActive
+          ? "bg-white/20 font-medium"
+          : "hover:bg-primary/80"
+      }`}
+    >
+      {icon}
+      <span>{label}</span>
       {badge !== undefined && badge > 0 && (
         <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
           {badge > 9 ? "9+" : badge}

@@ -54,3 +54,38 @@
     color: #9ca3af;
   }
 }
+
+/* Mobile responsive layout helpers */
+@media (max-width: 639px) {
+  .mobile-full {
+    width: 100%;
+  }
+  .mobile-hide {
+    display: none;
+  }
+  .mobile-block {
+    display: block;
+  }
+  .mobile-flex {
+    display: flex;
+  }
+  .mobile-p-0 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .mobile-overflow-x {
+    overflow-x: auto;
+  }
+}
+
+/* Ensure page content has proper padding when navbar is present */
+#__next {
+  min-height: 100vh;
+}
+
+/* Prevent zooming on form inputs in mobile */
+@media (max-width: 639px) {
+  input, textarea, select {
+    font-size: 16px;
+  }
+}
