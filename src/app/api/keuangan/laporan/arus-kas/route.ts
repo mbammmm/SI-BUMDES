@@ -25,16 +25,16 @@ export async function GET(request: Request) {
     });
 
     const cashIn = transactions
-      .filter((t) => t.type === "pemasukan")
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+      .filter((t: any) => t.type === "pemasukan")
+      .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
     const cashOut = transactions
-      .filter((t) => t.type === "pengeluaran")
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+      .filter((t: any) => t.type === "pengeluaran")
+      .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
     const netCashFlow = cashIn - cashOut;
 
-    const byDate = transactions.reduce((acc: any, t) => {
+    const byDate = transactions.reduce((acc: Record<string, any>, t: any) => {
       const date = new Date(t.transactionDate).toISOString().split("T")[0];
       if (!acc[date]) acc[date] = { date, pemasukan: 0, pengeluaran: 0 };
       if (t.type === "pemasukan") acc[date].pemasukan += Number(t.amount);

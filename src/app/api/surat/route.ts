@@ -48,7 +48,7 @@ async function generateLetterNumber(type: string, templateId?: string, letterDat
       },
     });
     return new Promise((resolve) => {
-      count.then((c) => {
+      count.then((c: number) => {
         const sequence = c + 1;
         resolve(`${String(sequence).padStart(3, "0")}/BUMDes/${month}/${year}`);
       });
@@ -66,7 +66,7 @@ async function generateLetterNumber(type: string, templateId?: string, letterDat
       },
     });
     return new Promise((resolve) => {
-      count.then((c) => {
+      count.then((c: number) => {
         const sequence = c + 1;
         resolve(`IN-${String(sequence).padStart(3, "0")}/${month}/${year}`);
       });

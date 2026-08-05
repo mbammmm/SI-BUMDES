@@ -21,8 +21,8 @@ export async function GET(request: Request) {
       orderBy: { transactionDate: "desc" },
     });
 
-    const accountCodes = [...new Set(transactions.map((tx) => tx.accountCode))];
-    const unitUsahaIds = [...new Set(transactions.map((tx) => tx.unitUsahaId))];
+    const accountCodes = [...new Set(transactions.map((tx: any) => tx.accountCode))];
+    const unitUsahaIds = [...new Set(transactions.map((tx: any) => tx.unitUsahaId))];
 
     const [accounts, units] = await Promise.all([
       prisma.chartOfAccount.findMany({
@@ -33,8 +33,8 @@ export async function GET(request: Request) {
       }),
     ]);
 
-    const accountMap = new Map(accounts.map((a) => [a.code, a]));
-    const unitMap = new Map(units.map((u) => [u.id, u]));
+    const accountMap: Map<string, any> = new Map(accounts.map((a: any) => [a.code, a]));
+    const unitMap: Map<string, any> = new Map(units.map((u: any) => [u.id, u]));
 
     const revenueByAccount: Record<string, { code: string; name: string; amount: number }> = {};
     const expenseByAccount: Record<string, { code: string; name: string; amount: number }> = {};

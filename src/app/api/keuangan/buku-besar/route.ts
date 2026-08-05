@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     });
 
     let saldo = 0;
-    const entries = transactions.map((tx) => {
+    const entries = transactions.map((tx: any) => {
       const isDebit = tx.type === "pemasukan";
       const isCredit = tx.type === "pengeluaran";
 

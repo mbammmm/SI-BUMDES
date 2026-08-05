@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
     const approvalData = await prisma.approvalStep.findMany({
       where: {
-        letterId: { in: letterData.map((l) => l.id) },
+        letterId: { in: letterData.map((l: any) => l.id) },
       },
       include: {
         approver: { select: { name: true } },
@@ -35,15 +35,15 @@ export async function GET(request: Request) {
     });
 
     const approvalMap = new Map<string, any[]>();
-    approvalData.forEach((a) => {
+    approvalData.forEach((a: any) => {
       const arr = approvalMap.get(a.letterId) || [];
       arr.push(a);
       approvalMap.set(a.letterId, arr);
     });
 
-    const letters = letterData.map((letter) => ({
+    const letters = letterData.map((letter: any) => ({
       ...letter,
-      approvalStatuses: approvalMap.get(letter.id)?.map((a) => `${a.approver.name}: ${a.status}`).join(", ") || "-",
+      approvalStatuses: approvalMap.get(letter.id)?.map((a: any) => `${a.approver.name}: ${a.status}`).join(", ") || "-",
     }));
 
     const workbook = new ExcelJS.Workbook();
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
     ]);
     headerRow.font = { bold: true };
 
-    letters.forEach((letter, index) => {
+    letters.forEach((letter: any, index: number) => {
       worksheet.addRow([
         index + 1,
         letter.number,

@@ -65,10 +65,10 @@ export async function GET(request: Request) {
       const userMap = new Map(
         (await prisma.user.findMany({
           select: { id: true, name: true },
-        })).map((u) => [u.id, u.name])
+        })).map((u: any) => [u.id, u.name])
       );
 
-      data = journalEntries.map((entry) => ({
+      data = journalEntries.map((entry: any) => ({
         ...entry,
         createdByName: userMap.get(entry.createdById) || "-",
       }));

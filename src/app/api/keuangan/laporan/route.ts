@@ -29,12 +29,12 @@ export async function GET(request: Request) {
     });
 
     const totalIncome = transactions
-      .filter((t) => t.type === "pemasukan")
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+      .filter((t: any) => t.type === "pemasukan")
+      .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
     const totalExpense = transactions
-      .filter((t) => t.type === "pengeluaran")
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+      .filter((t: any) => t.type === "pengeluaran")
+      .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
     return NextResponse.json({
       data: transactions,

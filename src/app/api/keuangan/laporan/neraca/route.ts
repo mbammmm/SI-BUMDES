@@ -5,8 +5,8 @@ export const dynamic = "force-dynamic";
 
 function getBalance(transactions: any[], accountCode: string): number {
   return transactions
-    .filter((t) => t.accountCode === accountCode)
-    .reduce((sum, t) => {
+    .filter((t: any) => t.accountCode === accountCode)
+    .reduce((sum: number, t: any) => {
       const amount = Number(t.amount);
       return t.type === "pemasukan" ? sum + amount : sum - amount;
     }, 0);
@@ -24,31 +24,31 @@ export async function GET(request: Request) {
       },
     });
 
-    const asetAccounts = accounts.filter((a) => a.category === "Aset" && a.type === "Debit");
-    const liabilitasAccounts = accounts.filter((a) => a.category === "Liabilitas" && a.type === "Kredit");
-    const ekuitasAccounts = accounts.filter((a) => a.category === "Ekuitas" && a.type === "Kredit");
+    const asetAccounts = accounts.filter((a: any) => a.category === "Aset" && a.type === "Debit");
+    const liabilitasAccounts = accounts.filter((a: any) => a.category === "Liabilitas" && a.type === "Kredit");
+    const ekuitasAccounts = accounts.filter((a: any) => a.category === "Ekuitas" && a.type === "Kredit");
 
-    const aset = asetAccounts.map((acc) => ({
+    const aset = asetAccounts.map((acc: any) => ({
       code: acc.code,
       name: acc.name,
       balance: getBalance(transactions, acc.code),
     }));
 
-    const liabilitas = liabilitasAccounts.map((acc) => ({
+    const liabilitas = liabilitasAccounts.map((acc: any) => ({
       code: acc.code,
       name: acc.name,
       balance: getBalance(transactions, acc.code),
     }));
 
-    const ekuitas = ekuitasAccounts.map((acc) => ({
+    const ekuitas = ekuitasAccounts.map((acc: any) => ({
       code: acc.code,
       name: acc.name,
       balance: getBalance(transactions, acc.code),
     }));
 
-    const totalAset = aset.reduce((sum, item) => sum + item.balance, 0);
-    const totalLiabilitas = liabilitas.reduce((sum, item) => sum + item.balance, 0);
-    const totalEkuitas = ekuitas.reduce((sum, item) => sum + item.balance, 0);
+    const totalAset = aset.reduce((sum: number, item: any) => sum + item.balance, 0);
+    const totalLiabilitas = liabilitas.reduce((sum: number, item: any) => sum + item.balance, 0);
+    const totalEkuitas = ekuitas.reduce((sum: number, item: any) => sum + item.balance, 0);
 
     return NextResponse.json({
       asOfDate,

@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       },
     });
 
-    const data = accounts.map((account) => {
+    const data = accounts.map((account: any) => {
       let debit = 0;
       let kredit = 0;
 
@@ -44,8 +44,8 @@ export async function GET(request: Request) {
       },
     });
 
-    transactions.forEach((tx) => {
-      const account = data.find((a) => a.code === tx.accountCode);
+    transactions.forEach((tx: any) => {
+      const account = data.find((a: any) => a.code === tx.accountCode);
       if (account) {
         const amount = Number(tx.amount);
         if (tx.type === "pemasukan") {
@@ -64,8 +64,8 @@ export async function GET(request: Request) {
       }
     });
 
-    const totalDebit = data.reduce((sum, a) => sum + a.debit, 0);
-    const totalKredit = data.reduce((sum, a) => sum + a.kredit, 0);
+    const totalDebit = data.reduce((sum: number, a: any) => sum + a.debit, 0);
+    const totalKredit = data.reduce((sum: number, a: any) => sum + a.kredit, 0);
 
     return NextResponse.json({
       data,

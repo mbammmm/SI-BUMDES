@@ -33,7 +33,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ data: [], unreadCount: 0 });
       }
 
-      const targetIds = usersInRole.map((u) => u.id);
+      const targetIds = usersInRole.map((u: any) => u.id);
       const notifications = await prisma.notification.findMany({
         where: {
           userId: { in: targetIds },
