@@ -235,52 +235,56 @@ export default function Navbar() {
               }
 
               return (
-              <div
-                key={group.label}
-                className="relative"
-                onMouseEnter={() => setDesktopDropdownOpen(group.label)}
-                onMouseLeave={() => setDesktopDropdownOpen(null)}
-              >
-                <button
-                  onClick={() => {
-                    if (desktopDropdownOpen === group.label) {
-                      setDesktopDropdownOpen(null);
-                    } else {
-                      setDesktopDropdownOpen(group.label);
-                    }
-                  }}
-                  className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded transition ${
-                    isGroupActive(group)
-                      ? "bg-white/20 font-medium"
-                      : "hover:bg-primary/80"
-                  }`}
+                <div
+                  key={group.label}
+                  className="relative"
+                  onMouseEnter={() => setDesktopDropdownOpen(group.label)}
+                  onMouseLeave={() => setTimeout(() => setDesktopDropdownOpen(null), 150)}
                 >
-                  {group.icon}
-                  <span>{group.label}</span>
-                  <ChevronDown size={14} className="ml-1" />
-                </button>
+                  <button
+                    onClick={() => {
+                      if (desktopDropdownOpen === group.label) {
+                        setDesktopDropdownOpen(null);
+                      } else {
+                        setDesktopDropdownOpen(group.label);
+                      }
+                    }}
+                    className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded transition ${
+                      isGroupActive(group)
+                        ? "bg-white/20 font-medium"
+                        : "hover:bg-primary/80"
+                    }`}
+                  >
+                    {group.icon}
+                    <span>{group.label}</span>
+                    <ChevronDown size={14} className="ml-1" />
+                  </button>
 
-                {desktopDropdownOpen === group.label && group.items && group.items.length > 0 && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white text-gray-900 rounded-lg shadow-lg border border-gray-200 py-1 z-50">
-                    {group.items.filter((item) => hasAccess(item.href)).map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`block px-3 py-2 text-sm hover:bg-gray-100 transition ${
-                          isItemActive(item.href)
-                            ? "bg-primary-50 text-primary font-medium"
-                            : ""
-                        }`}
-                        onClick={() => setDesktopDropdownOpen(null)}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  {desktopDropdownOpen === group.label && group.items && group.items.length > 0 && (
+                    <div
+                      className="absolute top-full left-0 mt-0.5 w-48 bg-white text-gray-900 rounded-lg shadow-lg border border-gray-200 py-1 z-50 transition-all duration-150"
+                      onMouseEnter={() => setDesktopDropdownOpen(group.label)}
+                      onMouseLeave={() => setTimeout(() => setDesktopDropdownOpen(null), 150)}
+                    >
+                      {group.items.filter((item) => hasAccess(item.href)).map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={`block px-3 py-2 text-sm hover:bg-gray-100 transition ${
+                            isItemActive(item.href)
+                              ? "bg-primary-50 text-primary font-medium"
+                              : ""
+                          }`}
+                          onClick={() => setDesktopDropdownOpen(null)}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
           <form action="/api/auth/logout" method="POST" className="ml-2">
             <button
