@@ -6,6 +6,10 @@ const nextConfig = {
   },
   webpack: (config, { isServer }) => {
     config.cache = false;
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push("exceljs");
+    }
     return config;
   },
 };

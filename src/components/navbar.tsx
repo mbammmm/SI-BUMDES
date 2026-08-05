@@ -68,6 +68,8 @@ const menuGroups = [
     items: [
       { href: "/keuangan/transaksi", label: "Transaksi" },
       { href: "/keuangan/jurnal", label: "Jurnal" },
+      { href: "/keuangan/buku-besar", label: "Buku Besar" },
+      { href: "/keuangan/neraca-salado", label: "Neraca Saldo" },
       { href: "/keuangan/laporan", label: "Laporan" },
       { href: "/keuangan/laporan/neraca", label: "Neraca" },
       { href: "/keuangan/laporan/laba-rugi", label: "Laba Rugi" },

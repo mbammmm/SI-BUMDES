@@ -35,7 +35,35 @@ export default function LaporanPage() {
 
   return (
     <div className="p-6 max-w-5xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Laporan Keuangan</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Laporan Keuangan</h1>
+        {(startDate || endDate) && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (startDate) params.set("startDate", startDate);
+                if (endDate) params.set("endDate", endDate);
+                window.open(`/api/keuangan/export?format=excel&reportType=transaksi&${params.toString()}`, "_blank");
+              }}
+              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition text-sm"
+            >
+              Export Excel
+            </button>
+            <button
+              onClick={() => {
+                const params = new URLSearchParams();
+                if (startDate) params.set("startDate", startDate);
+                if (endDate) params.set("endDate", endDate);
+                window.open(`/api/keuangan/export?format=pdf&reportType=transaksi&${params.toString()}`, "_blank");
+              }}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
+            >
+              Export PDF
+            </button>
+          </div>
+        )}
+      </div>
 
       <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 flex flex-wrap items-end gap-4">
         <div>

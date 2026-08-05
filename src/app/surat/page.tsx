@@ -178,15 +178,29 @@ export default function SuratPage() {
     <div className="p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Surat Menyurat</h1>
-        {canWrite && (
+        <div className="flex gap-2">
+          {canWrite && (
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-600 transition"
+            >
+              <Plus size={16} />
+              Buat Surat
+            </button>
+          )}
           <button
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-600 transition"
+            onClick={() => window.open(`/api/surat/export?format=excel&tab=${tab}`, "_blank")}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition text-sm"
           >
-            <Plus size={16} />
-            Buat Surat
+            Export Excel
           </button>
-        )}
+          <button
+            onClick={() => window.open(`/api/keuangan/export?format=pdf&reportType=surat`, "_blank")}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
+          >
+            Export PDF
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-2 mb-4">
