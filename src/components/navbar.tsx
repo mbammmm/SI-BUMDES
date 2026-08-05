@@ -8,18 +8,15 @@ import {
   LayoutDashboard,
   Building2,
   Factory,
-  BookOpen,
   Wallet,
-  FileText,
-  Package,
-  BarChart3,
   Mail,
   Archive,
+  Package,
   Users,
   Bell,
-  PieChart,
   Menu,
   X,
+  ChevronDown,
 } from "lucide-react";
 
 type User = {
@@ -37,17 +34,69 @@ const modulePermissions: Record<string, string> = {
   "/master/coa": "users",
   "/master/pengguna": "users",
   "/master/roles": "users",
-  "/keuangan/transaksi": "accounting",
-  "/keuangan/jurnal": "accounting",
-  "/keuangan/laporan/neraca": "accounting",
-  "/keuangan/laporan/laba-rugi": "accounting",
-  "/keuangan/laporan/arus-kas": "accounting",
-  "/keuangan/shu": "accounting",
+  "/keuangan": "accounting",
   "/surat": "letters",
   "/arsip": "archives",
   "/aset": "assets",
   "/notifikasi": "notifications",
 };
+
+const menuGroups = [
+  {
+    label: "Dashboard",
+    icon: <LayoutDashboard size={16} />,
+    href: "/",
+    permissions: [],
+  },
+  {
+    label: "Master Data",
+    icon: <Building2 size={16} />,
+    items: [
+      { href: "/master/profil", label: "Profil", icon: <Building2 size={14} /> },
+      { href: "/master/unit-usaha", label: "Unit Usaha", icon: <Factory size={14} /> },
+      { href: "/master/coa", label: "COA", icon: <Archive size={14} /> },
+      { href: "/master/pengguna", label: "Pengguna", icon: <Users size={14} /> },
+      { href: "/master/roles", label: "Peran", icon: <Users size={14} /> },
+    ],
+  },
+  {
+    label: "Keuangan",
+    icon: <Wallet size={16} />,
+    items: [
+      { href: "/keuangan/transaksi", label: "Transaksi" },
+      { href: "/keuangan/jurnal", label: "Jurnal" },
+      { href: "/keuangan/laporan", label: "Laporan" },
+      { href: "/keuangan/laporan/neraca", label: "Neraca" },
+      { href: "/keuangan/laporan/laba-rugi", label: "Laba Rugi" },
+      { href: "/keuangan/laporan/arus-kas", label: "Arus Kas" },
+      { href: "/keuangan/shu", label: "SHU" },
+    ],
+  },
+  {
+    label: "Surat",
+    icon: <Mail size={16} />,
+    items: [
+      { href: "/surat", label: "Surat" },
+      { href: "/surat/template", label: "Template" },
+    ],
+  },
+  {
+    label: "Arsip",
+    icon: <Archive size={16} />,
+    href: "/arsip",
+  },
+  {
+    label: "Aset",
+    icon: <Package size={16} />,
+    href: "/aset",
+  },
+  {
+    label: "Notifikasi",
+    icon: <Bell size={16} />,
+    href: "/notifikasi",
+    badge: true,
+  },
+];
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
@@ -55,6 +104,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null);
+  const [desktopDropdownOpen, setDesktopDropdownOpen] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -118,27 +169,23 @@ export default function Navbar() {
 
   if (isLoginPage) return null;
 
-  const menuItems = [
-    { href: "/", icon: <LayoutDashboard size={16} />, label: "Dashboard" },
-    { href: "/master/profil", icon: <Building2 size={16} />, label: "Profil" },
-    { href: "/master/unit-usaha", icon: <Factory size={16} />, label: "Unit Usaha" },
-    { href: "/master/coa", icon: <BookOpen size={16} />, label: "COA" },
-    { href: "/master/pengguna", icon: <Users size={16} />, label: "Pengguna" },
-    { href: "/master/roles", icon: <Users size={16} />, label: "Peran" },
-    { href: "/keuangan/transaksi", icon: <Wallet size={16} />, label: "Transaksi" },
-    { href: "/keuangan/jurnal", icon: <FileText size={16} />, label: "Jurnal" },
-    { href: "/keuangan/laporan/neraca", icon: <BarChart3 size={16} />, label: "Neraca" },
-    { href: "/keuangan/laporan/laba-rugi", icon: <BarChart3 size={16} />, label: "Laba Rugi" },
-    { href: "/keuangan/laporan/arus-kas", icon: <BarChart3 size={16} />, label: "Arus Kas" },
-    { href: "/keuangan/shu", icon: <PieChart size={16} />, label: "SHU" },
-    { href: "/surat", icon: <Mail size={16} />, label: "Surat" },
-    { href: "/surat/template", icon: <FileText size={16} />, label: "Template Surat" },
-    { href: "/arsip", icon: <Archive size={16} />, label: "Arsip" },
-    { href: "/aset", icon: <Package size={16} />, label: "Aset" },
-    { href: "/notifikasi", icon: <Bell size={16} />, label: "Notifikasi", badge: unreadCount },
-  ];
+  const visibleMenuGroups = ready
+    ? menuGroups.filter((group) => {
+        if (group.href) {
+          return hasAccess(group.href);
+        }
+        return group.items!.some((item) => hasAccess(item.href));
+      })
+    : menuGroups;
 
-  const visibleMenuItems = ready ? menuItems.filter((item) => hasAccess(item.href)) : menuItems;
+  function isGroupActive(group: any) {
+    if (group.href) return pathname === group.href;
+    return group.items?.some((item: any) => pathname === item.href) || false;
+  }
+
+  function isItemActive(href: string) {
+    return pathname === href;
+  }
 
   return (
     <header className="bg-primary text-white shadow-md sticky top-0 z-50">
@@ -153,20 +200,82 @@ export default function Navbar() {
           <span className="font-semibold text-lg">SI-BUMDes Maju Langgeng</span>
         </div>
 
-        <div className="flex items-center gap-1 overflow-x-auto">
-          {visibleMenuItems.map((item) => (
-            <NavLink
-              key={item.href}
-              href={item.href}
-              icon={item.icon}
-              label={item.label}
-              badge={item.badge}
-            />
-          ))}
-          <form action="/api/auth/logout" method="POST">
+        <div className="flex items-center gap-1">
+          {visibleMenuGroups.map((group) => {
+            if (group.href) {
+              return (
+                <Link
+                  key={group.label}
+                  href={group.href}
+                  className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded transition relative ${
+                    isItemActive(group.href)
+                      ? "bg-white/20 font-medium"
+                      : "hover:bg-primary/80"
+                  }`}
+                >
+                  {group.icon}
+                  <span>{group.label}</span>
+                  {group.badge && unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
+                );
+              }
+
+              return (
+              <div
+                key={group.label}
+                className="relative"
+                onMouseEnter={() => setDesktopDropdownOpen(group.label)}
+                onMouseLeave={() => setDesktopDropdownOpen(null)}
+              >
+                <button
+                  onClick={() => {
+                    if (desktopDropdownOpen === group.label) {
+                      setDesktopDropdownOpen(null);
+                    } else {
+                      setDesktopDropdownOpen(group.label);
+                    }
+                  }}
+                  className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded transition ${
+                    isGroupActive(group)
+                      ? "bg-white/20 font-medium"
+                      : "hover:bg-primary/80"
+                  }`}
+                >
+                  {group.icon}
+                  <span>{group.label}</span>
+                  <ChevronDown size={14} className="ml-1" />
+                </button>
+
+                {desktopDropdownOpen === group.label && group.items && group.items.length > 0 && (
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white text-gray-900 rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    {group.items.filter((item) => hasAccess(item.href)).map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`block px-3 py-2 text-sm hover:bg-gray-100 transition ${
+                          isItemActive(item.href)
+                            ? "bg-primary-50 text-primary font-medium"
+                            : ""
+                        }`}
+                        onClick={() => setDesktopDropdownOpen(null)}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          <form action="/api/auth/logout" method="POST" className="ml-2">
             <button
               type="submit"
-              className="flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-1.5 rounded transition ml-2"
+              className="flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-1.5 rounded transition"
             >
               <LogOut size={16} />
               <span>Keluar</span>
@@ -199,20 +308,82 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden bg-primary border-t border-white/20 max-h-[70vh] overflow-y-auto">
           <div className="px-2 py-2 space-y-1">
-            {visibleMenuItems.map((item) => (
-              <MobileNavLink
-                key={item.href}
-                href={item.href}
-                icon={item.icon}
-                label={item.label}
-                badge={item.badge}
-                onClick={() => setMobileOpen(false)}
-              />
-            ))}
+            {visibleMenuGroups.map((group) => {
+              if (group.href) {
+                return (
+                  <Link
+                    key={group.label}
+                    href={group.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-3 text-sm px-3 py-2.5 rounded transition relative ${
+                      isItemActive(group.href)
+                        ? "bg-white/20 font-medium"
+                        : "hover:bg-primary/80"
+                    }`}
+                  >
+                    {group.icon}
+                    <span>{group.label}</span>
+                    {group.badge && unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                );
+              }
+
+              return (
+                <div key={group.label}>
+                  <button
+                    onClick={() => {
+                      if (mobileDropdownOpen === group.label) {
+                        setMobileDropdownOpen(null);
+                      } else {
+                        setMobileDropdownOpen(group.label);
+                      }
+                    }}
+                    className={`w-full flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded transition ${
+                      isGroupActive(group)
+                        ? "bg-white/20 font-medium"
+                        : "hover:bg-primary/80"
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      {group.icon}
+                      {group.label}
+                    </span>
+                    <ChevronDown size={14} className="ml-1" />
+                  </button>
+
+                  {mobileDropdownOpen === group.label && group.items && group.items.length > 0 && (
+                    <div className="pl-6 pr-2 space-y-1">
+                      {group.items.filter((item) => hasAccess(item.href)).map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => {
+                            setMobileOpen(false);
+                            setMobileDropdownOpen(null);
+                          }}
+                          className={`flex items-center gap-3 text-sm px-3 py-2 rounded transition ${
+                            isItemActive(item.href)
+                              ? "bg-white/20 font-medium"
+                              : "hover:bg-primary/80"
+                          }`}
+                        >
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
             <form action="/api/auth/logout" method="POST" className="-mx-2">
               <button
                 type="submit"
-                className="w-full flex items-center gap-3 text-sm hover:bg-primary/80 px-3 py-2.5 rounded transition"
+                className="w-full flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-2.5 rounded transition"
               >
                 <LogOut size={16} />
                 <span>Keluar</span>
@@ -222,76 +393,5 @@ export default function Navbar() {
         </div>
       )}
     </header>
-  );
-}
-
-function NavLink({
-  href,
-  icon,
-  label,
-  badge,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  badge?: number;
-}) {
-  const pathname = usePathname();
-  const isActive = pathname === href;
-
-  return (
-    <Link
-      href={href}
-      className={`flex items-center gap-1 text-sm px-3 py-1.5 rounded transition relative ${
-        isActive
-          ? "bg-white/20 font-medium"
-          : "hover:bg-primary/80"
-      }`}
-    >
-      {icon}
-      <span>{label}</span>
-      {badge !== undefined && badge > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-          {badge > 9 ? "9+" : badge}
-        </span>
-      )}
-    </Link>
-  );
-}
-
-function MobileNavLink({
-  href,
-  icon,
-  label,
-  badge,
-  onClick,
-}: {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  badge?: number;
-  onClick: () => void;
-}) {
-  const pathname = usePathname();
-  const isActive = pathname === href;
-
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className={`flex items-center gap-3 text-sm px-3 py-2.5 rounded transition relative ${
-        isActive
-          ? "bg-white/20 font-medium"
-          : "hover:bg-primary/80"
-      }`}
-    >
-      {icon}
-      <span>{label}</span>
-      {badge !== undefined && badge > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-          {badge > 9 ? "9+" : badge}
-        </span>
-      )}
-    </Link>
   );
 }
