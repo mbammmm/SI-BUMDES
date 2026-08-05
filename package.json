@@ -4,7 +4,7 @@
   "description": "Sistem Informasi Terpadu BUMDes Maju Langgeng",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
+    "@prisma/client": "^6.19.3",
     "@react-pdf/renderer": "^4.5.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@tanstack/react-query": "^5.83.0",
@@ -34,7 +35,6 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
-    "@prisma/client": "^6.19.3",
     "@types/node": "^22.15.0",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.1.0",
@@ -48,6 +48,6 @@
     "prisma": "^6.19.3",
     "tailwindcss": "^4.1.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.8.0"
+    "typescript": "^5.9.3"
   }
 }
