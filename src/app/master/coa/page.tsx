@@ -66,8 +66,8 @@ export default function CoaPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Chart of Account</h1>
 
       {canWrite && (
-        <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={onSubmit} className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-1">Kode Akun</label>
             <input
@@ -92,7 +92,7 @@ export default function CoaPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-1">Kategori</label>
             <select
@@ -138,7 +138,8 @@ export default function CoaPage() {
       )}
 
       <div className="bg-white rounded-lg border border-gray-200">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[400px]">
           <thead className="bg-gray-50">
             <tr>
               <th className="text-left px-4 py-3 text-gray-900 font-semibold">Kode</th>
@@ -158,6 +159,7 @@ export default function CoaPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

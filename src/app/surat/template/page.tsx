@@ -133,8 +133,8 @@ export default function TemplateSuratPage() {
       )}
 
       {showForm && (
-        <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={onSubmit} className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Nama Template</label>
               <input

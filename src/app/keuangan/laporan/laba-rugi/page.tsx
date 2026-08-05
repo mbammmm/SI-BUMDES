@@ -65,7 +65,8 @@ export default function LabaRugiPage() {
             <div className="px-4 py-3 bg-green-50 border-b border-gray-200">
               <h2 className="font-semibold text-green-700">Pendapatan</h2>
             </div>
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[400px]">
               <tbody>
                 {data.pendapatan.map((item) => (
                   <tr key={item.code} className="border-t border-gray-100">
@@ -84,13 +85,15 @@ export default function LabaRugiPage() {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
 
           <div className="bg-white rounded-lg border border-gray-200">
             <div className="px-4 py-3 bg-red-50 border-b border-gray-200">
               <h2 className="font-semibold text-red-700">Beban</h2>
             </div>
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[400px]">
               <tbody>
                 {data.beban.map((item) => (
                   <tr key={item.code} className="border-t border-gray-100">
@@ -109,6 +112,7 @@ export default function LabaRugiPage() {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
 
           <div className={`rounded-lg border p-4 ${data.totals.labaRugi >= 0 ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}`}>

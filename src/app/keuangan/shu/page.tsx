@@ -104,58 +104,62 @@ export default function SHUPage() {
           <div className="px-4 py-3 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900">Pendapatan per Akun</h2>
           </div>
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="text-left px-4 py-2 text-gray-900 font-semibold">Kode</th>
-                <th className="text-left px-4 py-2 text-gray-900 font-semibold">Nama</th>
-                <th className="text-right px-4 py-2 text-gray-900 font-semibold">Jumlah</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.revenueByAccount.map((item) => (
-                <tr key={item.code} className="border-t border-gray-100">
-                  <td className="px-4 py-2 text-gray-600">{item.code}</td>
-                  <td className="px-4 py-2 text-gray-900">{item.name}</td>
-                  <td className="px-4 py-2 text-right text-green-700">{item.amount.toLocaleString("id-ID")}</td>
-                </tr>
-              ))}
-              {data.revenueByAccount.length === 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[400px]">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={3} className="px-4 py-6 text-center text-gray-500">Belum ada pendapatan</td>
+                  <th className="text-left px-4 py-2 text-gray-900 font-semibold">Kode</th>
+                  <th className="text-left px-4 py-2 text-gray-900 font-semibold">Nama</th>
+                  <th className="text-right px-4 py-2 text-gray-900 font-semibold">Jumlah</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.revenueByAccount.map((item) => (
+                  <tr key={item.code} className="border-t border-gray-100">
+                    <td className="px-4 py-2 text-gray-600">{item.code}</td>
+                    <td className="px-4 py-2 text-gray-900">{item.name}</td>
+                    <td className="px-4 py-2 text-right text-green-700">{item.amount.toLocaleString("id-ID")}</td>
+                  </tr>
+                ))}
+                {data.revenueByAccount.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="px-4 py-6 text-center text-gray-500">Belum ada pendapatan</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="px-4 py-3 border-b border-gray-200">
             <h2 className="font-semibold text-gray-900">Beban per Akun</h2>
           </div>
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="text-left px-4 py-2 text-gray-900 font-semibold">Kode</th>
-                <th className="text-left px-4 py-2 text-gray-900 font-semibold">Nama</th>
-                <th className="text-right px-4 py-2 text-gray-900 font-semibold">Jumlah</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.expenseByAccount.map((item) => (
-                <tr key={item.code} className="border-t border-gray-100">
-                  <td className="px-4 py-2 text-gray-600">{item.code}</td>
-                  <td className="px-4 py-2 text-gray-900">{item.name}</td>
-                  <td className="px-4 py-2 text-right text-red-700">{item.amount.toLocaleString("id-ID")}</td>
-                </tr>
-              ))}
-              {data.expenseByAccount.length === 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[400px]">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={3} className="px-4 py-6 text-center text-gray-500">Belum ada beban</td>
+                  <th className="text-left px-4 py-2 text-gray-900 font-semibold">Kode</th>
+                  <th className="text-left px-4 py-2 text-gray-900 font-semibold">Nama</th>
+                  <th className="text-right px-4 py-2 text-gray-900 font-semibold">Jumlah</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.expenseByAccount.map((item) => (
+                  <tr key={item.code} className="border-t border-gray-100">
+                    <td className="px-4 py-2 text-gray-600">{item.code}</td>
+                    <td className="px-4 py-2 text-gray-900">{item.name}</td>
+                    <td className="px-4 py-2 text-right text-red-700">{item.amount.toLocaleString("id-ID")}</td>
+                  </tr>
+                ))}
+                {data.expenseByAccount.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="px-4 py-6 text-center text-gray-500">Belum ada beban</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

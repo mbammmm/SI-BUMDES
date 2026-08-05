@@ -140,8 +140,8 @@ export default function AsetPage() {
       </div>
 
       {canWrite && showForm && (
-        <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={onSubmit} className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Nama Aset</label>
               <input
@@ -166,7 +166,7 @@ export default function AsetPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Tanggal Perolehan</label>
               <input
@@ -193,7 +193,7 @@ export default function AsetPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Nilai Perolehan (Rp)</label>
               <input
@@ -259,60 +259,62 @@ export default function AsetPage() {
           <Package size={18} className="text-primary" />
           <h2 className="font-semibold text-gray-900">Daftar Aset</h2>
         </div>
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Nama</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Kategori</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Unit Usaha</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Nilai</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Penyusutan/bln</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Status</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">QR</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assets.map((asset) => {
-              const monthlyDep = calculateDepreciation(asset);
-              return (
-                <tr key={asset.id} className="border-t border-gray-100">
-                  <td className="px-4 py-3 text-gray-900">{asset.name}</td>
-                  <td className="px-4 py-3 text-gray-900">{asset.category}</td>
-                  <td className="px-4 py-3 text-gray-900">
-                    {units.find((u) => u.id === asset.unitUsahaId)?.name || asset.unitUsahaId}
-                  </td>
-                  <td className="px-4 py-3 text-gray-900">
-                    {Number(asset.acquisitionValue).toLocaleString("id-ID")}
-                  </td>
-                  <td className="px-4 py-3 text-gray-900">
-                    {monthlyDep.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded text-xs font-semibold ${asset.status === "aktif" ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-700"}`}>
-                      {asset.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => setQrAsset(asset)}
-                      className="text-primary hover:text-primary-600"
-                      title="Lihat QR Code"
-                    >
-                      <QrCode size={18} />
-                    </button>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[700px]">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Nama</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Kategori</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Unit Usaha</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Nilai</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Penyusutan/bln</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Status</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">QR</th>
+              </tr>
+            </thead>
+            <tbody>
+              {assets.map((asset) => {
+                const monthlyDep = calculateDepreciation(asset);
+                return (
+                  <tr key={asset.id} className="border-t border-gray-100">
+                    <td className="px-4 py-3 text-gray-900">{asset.name}</td>
+                    <td className="px-4 py-3 text-gray-900">{asset.category}</td>
+                    <td className="px-4 py-3 text-gray-900">
+                      {units.find((u) => u.id === asset.unitUsahaId)?.name || asset.unitUsahaId}
+                    </td>
+                    <td className="px-4 py-3 text-gray-900">
+                      {Number(asset.acquisitionValue).toLocaleString("id-ID")}
+                    </td>
+                    <td className="px-4 py-3 text-gray-900">
+                      {monthlyDep.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${asset.status === "aktif" ? "bg-green-50 text-green-700" : "bg-gray-50 text-gray-700"}`}>
+                        {asset.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => setQrAsset(asset)}
+                        className="text-primary hover:text-primary-600"
+                        title="Lihat QR Code"
+                      >
+                        <QrCode size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+              {assets.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                    Belum ada aset
                   </td>
                 </tr>
-              );
-            })}
-            {assets.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                  Belum ada aset
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {qrAsset && (

@@ -111,8 +111,8 @@ export default function ArsipPage() {
       </div>
 
       {canWrite && showForm && (
-        <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={onSubmit} className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Judul Dokumen</label>
               <input
@@ -139,7 +139,7 @@ export default function ArsipPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Tanggal Dokumen</label>
               <input
@@ -193,39 +193,41 @@ export default function ArsipPage() {
         <div className="px-4 py-3 border-b border-gray-200">
           <h2 className="font-semibold text-gray-900">Daftar Dokumen Arsip</h2>
         </div>
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Judul</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Kategori</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Tanggal</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Tags</th>
-            </tr>
-          </thead>
-          <tbody>
-            {documents.map((doc) => (
-              <tr key={doc.id} className="border-t border-gray-100">
-                <td className="px-4 py-3 text-gray-900">{doc.title}</td>
-                <td className="px-4 py-3 text-gray-900">
-                  {categories.find((c) => c.id === doc.categoryId)?.name || doc.categoryId}
-                </td>
-                <td className="px-4 py-3 text-gray-900">
-                  {new Date(doc.documentDate).toLocaleDateString("id-ID")}
-                </td>
-                <td className="px-4 py-3 text-gray-600">
-                  {doc.tags?.join(", ") || "-"}
-                </td>
-              </tr>
-            ))}
-            {documents.length === 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[500px]">
+            <thead className="bg-gray-50">
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
-                  Belum ada dokumen arsip
-                </td>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Judul</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Kategori</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Tanggal</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Tags</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {documents.map((doc) => (
+                <tr key={doc.id} className="border-t border-gray-100">
+                  <td className="px-4 py-3 text-gray-900">{doc.title}</td>
+                  <td className="px-4 py-3 text-gray-900">
+                    {categories.find((c) => c.id === doc.categoryId)?.name || doc.categoryId}
+                  </td>
+                  <td className="px-4 py-3 text-gray-900">
+                    {new Date(doc.documentDate).toLocaleDateString("id-ID")}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {doc.tags?.join(", ") || "-"}
+                  </td>
+                </tr>
+              ))}
+              {documents.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                    Belum ada dokumen arsip
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

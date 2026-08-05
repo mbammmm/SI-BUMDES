@@ -86,7 +86,8 @@ export default function LaporanPage() {
               <BarChart3 size={18} className="text-primary" />
               <h2 className="font-semibold text-gray-900">Rincian Transaksi</h2>
             </div>
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[500px]">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="text-left px-4 py-3 text-gray-900 font-semibold">Tanggal</th>
@@ -121,6 +122,7 @@ export default function LaporanPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </>
       )}

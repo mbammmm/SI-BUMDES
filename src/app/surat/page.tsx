@@ -205,7 +205,7 @@ export default function SuratPage() {
       </div>
 
       {canWrite && showForm && (
-        <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
+        <form onSubmit={onSubmit} className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 mb-6 space-y-4">
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-1">Template Surat (opsional)</label>
             <select
@@ -234,7 +234,7 @@ export default function SuratPage() {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Perihal</label>
               <input
@@ -328,47 +328,48 @@ export default function SuratPage() {
             {tab === "keluar" ? "Surat Keluar" : "Surat Masuk"}
           </h2>
         </div>
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Nomor</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Perihal</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Tanggal</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Pengirim/Penerima</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Status</th>
-              <th className="text-left px-4 py-3 text-gray-900 font-semibold">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {letters.map((letter) => (
-              <tr key={letter.id} className="border-t border-gray-100">
-                <td className="px-4 py-3 text-gray-900">{letter.number}</td>
-                <td className="px-4 py-3 text-gray-900">{letter.subject}</td>
-                <td className="px-4 py-3 text-gray-900">
-                  {tab === "keluar" && letter.outgoingDate
-                    ? new Date(letter.outgoingDate).toLocaleDateString("id-ID")
-                    : tab === "masuk" && letter.incomingDate
-                    ? new Date(letter.incomingDate).toLocaleDateString("id-ID")
-                    : "-"}
-                </td>
-                <td className="px-4 py-3 text-gray-900">
-                  {tab === "keluar" ? letter.recipient : letter.sender}
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(letter.status)}`}>
-                    {getStatusLabel(letter.status)}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <button
-                    onClick={() => viewApprovals(letter)}
-                    className="text-primary hover:text-primary-600 text-sm font-medium"
-                  >
-                    Lihat Approval
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Nomor</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Perihal</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Tanggal</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Pengirim/Penerima</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Status</th>
+                <th className="text-left px-4 py-3 text-gray-900 font-semibold">Aksi</th>
               </tr>
-            ))}
+            </thead>
+            <tbody>
+              {letters.map((letter) => (
+                <tr key={letter.id} className="border-t border-gray-100">
+                  <td className="px-4 py-3 text-gray-900">{letter.number}</td>
+                  <td className="px-4 py-3 text-gray-900">{letter.subject}</td>
+                  <td className="px-4 py-3 text-gray-900">
+                    {tab === "keluar" && letter.outgoingDate
+                      ? new Date(letter.outgoingDate).toLocaleDateString("id-ID")
+                      : tab === "masuk" && letter.incomingDate
+                      ? new Date(letter.incomingDate).toLocaleDateString("id-ID")
+                      : "-"}
+                  </td>
+                  <td className="px-4 py-3 text-gray-900">
+                    {tab === "keluar" ? letter.recipient : letter.sender}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${getStatusColor(letter.status)}`}>
+                      {getStatusLabel(letter.status)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => viewApprovals(letter)}
+                      className="text-primary hover:text-primary-600 text-sm font-medium"
+                    >
+                      Lihat Approval
+                    </button>
+                  </td>
+                </tr>
+              ))}
             {letters.length === 0 && (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
@@ -378,11 +379,12 @@ export default function SuratPage() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {selectedLetter && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedLetter(null)}>
-          <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white p-4 sm:p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Approval: {selectedLetter.number} - {selectedLetter.subject}
             </h3>

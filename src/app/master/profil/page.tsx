@@ -65,7 +65,7 @@ export default function ProfilPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Profil BUMDes</h1>
 
       {canWrite ? (
-        <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg border border-gray-200 space-y-4">
+        <form onSubmit={onSubmit} className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 space-y-4">
           {message && (
             <div className="p-3 text-sm text-green-700 bg-green-50 rounded border border-green-200">
               {message}
@@ -94,7 +94,7 @@ export default function ProfilPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Telepon</label>
               <input
@@ -115,7 +115,7 @@ export default function ProfilPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">NIB</label>
               <input
@@ -154,7 +154,7 @@ export default function ProfilPage() {
             <label className="block text-sm font-semibold text-gray-900 mb-1">Alamat</label>
             <p className="text-gray-900 whitespace-pre-wrap">{form.address}</p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">Telepon</label>
               <p className="text-gray-900">{form.phone || "-"}</p>
@@ -164,7 +164,7 @@ export default function ProfilPage() {
               <p className="text-gray-900">{form.email || "-"}</p>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-1">NIB</label>
               <p className="text-gray-900">{form.nib || "-"}</p>

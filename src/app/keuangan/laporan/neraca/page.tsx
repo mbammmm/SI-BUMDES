@@ -62,7 +62,8 @@ export default function NeracaPage() {
             <div className="px-4 py-3 bg-primary/10 border-b border-gray-200">
               <h2 className="font-semibold text-primary">Aset</h2>
             </div>
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[400px]">
               <tbody>
                 {data.aset.map((item) => (
                   <tr key={item.code} className="border-t border-gray-100">
@@ -81,13 +82,15 @@ export default function NeracaPage() {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
 
           <div className="bg-white rounded-lg border border-gray-200">
             <div className="px-4 py-3 bg-primary/10 border-b border-gray-200">
               <h2 className="font-semibold text-primary">Liabilitas</h2>
             </div>
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[400px]">
               <tbody>
                 {data.liabilitas.map((item) => (
                   <tr key={item.code} className="border-t border-gray-100">
@@ -106,13 +109,15 @@ export default function NeracaPage() {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
 
           <div className="bg-white rounded-lg border border-gray-200">
             <div className="px-4 py-3 bg-primary/10 border-b border-gray-200">
               <h2 className="font-semibold text-primary">Ekuitas</h2>
             </div>
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[400px]">
               <tbody>
                 {data.ekuitas.map((item) => (
                   <tr key={item.code} className="border-t border-gray-100">
@@ -131,6 +136,7 @@ export default function NeracaPage() {
                 </tr>
               </tbody>
             </table>
+            </div>
           </div>
 
           <div className="bg-primary/10 rounded-lg border border-primary/20 p-4">

@@ -34,7 +34,7 @@ export default function ArusKasPage() {
   if (!allowed) return null;
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Laporan Arus Kas</h1>
 
       <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 flex flex-wrap items-end gap-4">
@@ -85,41 +85,43 @@ export default function ArusKasPage() {
             <div className="px-4 py-3 border-b border-gray-200">
               <h2 className="font-semibold text-gray-900">Rincian Harian</h2>
             </div>
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="text-left px-4 py-3 text-gray-900 font-semibold">Tanggal</th>
-                  <th className="text-right px-4 py-3 text-gray-900 font-semibold">Pemasukan</th>
-                  <th className="text-right px-4 py-3 text-gray-900 font-semibold">Pengeluaran</th>
-                  <th className="text-right px-4 py-3 text-gray-900 font-semibold">Net</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.dailyBreakdown.map((item) => (
-                  <tr key={item.date} className="border-t border-gray-100">
-                    <td className="px-4 py-3 text-gray-900">
-                      {new Date(item.date).toLocaleDateString("id-ID")}
-                    </td>
-                    <td className="px-4 py-3 text-right text-green-700">
-                      {item.pemasukan.toLocaleString("id-ID")}
-                    </td>
-                    <td className="px-4 py-3 text-right text-red-700">
-                      {item.pengeluaran.toLocaleString("id-ID")}
-                    </td>
-                    <td className={`px-4 py-3 text-right font-semibold ${item.net >= 0 ? "text-green-700" : "text-red-700"}`}>
-                      {item.net.toLocaleString("id-ID")}
-                    </td>
-                  </tr>
-                ))}
-                {data.dailyBreakdown.length === 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm min-w-[500px]">
+                <thead className="bg-gray-50">
                   <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
-                      Belum ada transaksi
-                    </td>
+                    <th className="text-left px-4 py-3 text-gray-900 font-semibold">Tanggal</th>
+                    <th className="text-right px-4 py-3 text-gray-900 font-semibold">Pemasukan</th>
+                    <th className="text-right px-4 py-3 text-gray-900 font-semibold">Pengeluaran</th>
+                    <th className="text-right px-4 py-3 text-gray-900 font-semibold">Net</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {data.dailyBreakdown.map((item) => (
+                    <tr key={item.date} className="border-t border-gray-100">
+                      <td className="px-4 py-3 text-gray-900">
+                        {new Date(item.date).toLocaleDateString("id-ID")}
+                      </td>
+                      <td className="px-4 py-3 text-right text-green-700">
+                        {item.pemasukan.toLocaleString("id-ID")}
+                      </td>
+                      <td className="px-4 py-3 text-right text-red-700">
+                        {item.pengeluaran.toLocaleString("id-ID")}
+                      </td>
+                      <td className={`px-4 py-3 text-right font-semibold ${item.net >= 0 ? "text-green-700" : "text-red-700"}`}>
+                        {item.net.toLocaleString("id-ID")}
+                      </td>
+                    </tr>
+                  ))}
+                  {data.dailyBreakdown.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                        Belum ada transaksi
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
