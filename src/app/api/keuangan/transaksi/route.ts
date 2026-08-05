@@ -20,6 +20,7 @@ export async function GET(request: Request) {
       if (startDate) where.transactionDate.gte = new Date(startDate);
       if (endDate) where.transactionDate.lte = new Date(endDate);
     }
+    where.isDeleted = false;
 
     const transactions = await prisma.transaction.findMany({
       where,
@@ -122,5 +123,75 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating transaction:", error);
     return NextResponse.json({ error: "Gagal menambah transaksi" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
+    const userPermissions = user!.role?.permissions as Record<string, any> || {};
+    const { getPermissions } = await import("@/lib/rbac");
+    const permissions = getPermissions(userPermissions);
+
+    if (!hasPermission(permissions, "accounting:crud")) {
+      return NextResponse.json({ error: "Tidak memiliki akses menghapus" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "ID transaksi diperlukan" }, { status: 400 });
+    }
+
+    const existing = await prisma.transaction.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Transaksi tidak ditemukan" }, { status: 404 });
+    }
+
+    if (existing.isPosted) {
+      return NextResponse.json(
+        { error: "Transaksi yang sudah diposting tidak bisa dihapus, gunakan pembatalan" },
+        { status: 400 }
+      );
+    }
+
+    if (existing.isDeleted) {
+      return NextResponse.json({ error: "Transaksi sudah dihapus" }, { status: 400 });
+    }
+
+    await prisma.transaction.update({
+      where: { id },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
+    });
+
+    await prisma.journalEntry.updateMany({
+      where: { reference: id },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
+    });
+
+    await logAuditEvent({
+      userId: user!.id,
+      action: "delete",
+      entityType: "Transaction",
+      entityId: id,
+      changes: { softDeleted: true, reason: "Deleted by user" },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+    return NextResponse.json({ error: "Gagal menghapus transaksi" }, { status: 500 });
   }
 }

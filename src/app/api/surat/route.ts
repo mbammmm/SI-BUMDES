@@ -13,6 +13,7 @@ export async function GET(request: Request) {
 
     const where: any = {};
     if (type) where.type = type;
+    where.isDeleted = false;
 
     const letters = await prisma.letter.findMany({
       where,
@@ -40,6 +41,7 @@ async function generateLetterNumber(type: string, templateId?: string, letterDat
     const count = prisma.letter.count({
       where: {
         type: "keluar",
+        isDeleted: false,
         createdAt: {
           gte: new Date(`${year}-${month}-01`),
         },
@@ -57,6 +59,7 @@ async function generateLetterNumber(type: string, templateId?: string, letterDat
     const count = prisma.letter.count({
       where: {
         type: "masuk",
+        isDeleted: false,
         createdAt: {
           gte: new Date(`${year}-${month}-01`),
         },
@@ -135,5 +138,60 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating letter:", error);
     return NextResponse.json({ error: "Gagal menambah surat" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
+    const userPermissions = user!.role?.permissions as Record<string, any> || {};
+    const { getPermissions } = await import("@/lib/rbac");
+    const permissions = getPermissions(userPermissions);
+
+    if (!hasPermission(permissions, "letters:crud")) {
+      return NextResponse.json({ error: "Tidak memiliki akses menghapus" }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "ID surat diperlukan" }, { status: 400 });
+    }
+
+    const existing = await prisma.letter.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Surat tidak ditemukan" }, { status: 404 });
+    }
+
+    if (existing.isDeleted) {
+      return NextResponse.json({ error: "Surat sudah dihapus" }, { status: 400 });
+    }
+
+    await prisma.letter.update({
+      where: { id },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+      },
+    });
+
+    await logAuditEvent({
+      userId: user!.id,
+      action: "delete",
+      entityType: "Letter",
+      entityId: id,
+      changes: { softDeleted: true },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting letter:", error);
+    return NextResponse.json({ error: "Gagal menghapus surat" }, { status: 500 });
   }
 }
