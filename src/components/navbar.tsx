@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  Clock,
 } from "lucide-react";
 
 type User = {
@@ -29,6 +30,7 @@ type User = {
 };
 
 const modulePermissions: Record<string, string> = {
+  "/": "",
   "/master/profil": "users",
   "/master/unit-usaha": "users",
   "/master/coa": "users",
@@ -39,6 +41,7 @@ const modulePermissions: Record<string, string> = {
   "/arsip": "archives",
   "/aset": "assets",
   "/notifikasi": "notifications",
+  "/audit-log": "users",
 };
 
 const menuGroups = [
@@ -95,6 +98,11 @@ const menuGroups = [
     icon: <Bell size={16} />,
     href: "/notifikasi",
     badge: true,
+  },
+  {
+    label: "Audit Trail",
+    icon: <Clock size={16} />,
+    href: "/audit-log",
   },
 ];
 

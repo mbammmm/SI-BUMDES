@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
 import { hasPermission, type Permission } from "@/lib/rbac";
+import { logAuditEvent } from "@/lib/audit-logger";
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +122,14 @@ export async function POST(request: Request) {
         },
       });
     }
+
+    await logAuditEvent({
+      userId: user!.id,
+      action: "create",
+      entityType: "Letter",
+      entityId: letter.id,
+      changes: { number, subject, type, status: type === "keluar" ? "draft" : "received" },
+    });
 
     return NextResponse.json({ data: letter });
   } catch (error) {
