@@ -112,6 +112,34 @@ export async function GET(request: Request) {
         { header: "Status", key: "status", width: 12 },
         { header: "Oleh", key: "createdBy", width: 15 },
       ];
+    } else if (reportType === "penyusutan") {
+      sheetName = "Penyusutan";
+      fileName = "laporan-penyusutan";
+      data = await prisma.assetDepreciationSchedule.findMany({
+        where,
+        include: {
+          asset: {
+            select: {
+              name: true,
+              category: true,
+              acquisitionValue: true,
+              salvageValue: true,
+              usefulLife: true,
+              acquisitionDate: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      columns = [
+        { header: "No", key: "no", width: 5 },
+        { header: "Nama Aset", key: "assetName", width: 20 },
+        { header: "Kategori", key: "assetCategory", width: 15 },
+        { header: "Periode", key: "period", width: 12 },
+        { header: "Jumlah Penyusutan (Rp)", key: "amount", width: 20 },
+        { header: "Status", key: "isAccrued", width: 12 },
+        { header: "Tanggal Dibuat", key: "createdAt", width: 15 },
+      ];
     }
 
     if (format === "excel") {
@@ -168,6 +196,11 @@ async function exportToExcel(data: any[], columns: any[], sheetName: string, fil
         : item.incomingDate
         ? new Date(item.incomingDate).toLocaleDateString("id-ID")
         : "-",
+      assetName: item.asset?.name || "-",
+      assetCategory: item.asset?.category || "-",
+      period: item.period || "-",
+      isAccrued: item.isAccrued ? "Ya" : "Tidak",
+      itemCreatedAt: item.createdAt ? new Date(item.createdAt).toLocaleDateString("id-ID") : "-",
     });
   });
 
@@ -255,10 +288,11 @@ async function exportToPDF(reportType: string, data: any[], startDate?: string, 
 
   const buffer = Buffer.concat(chunks);
 
-  let reportName = reportType;
+   let reportName = reportType;
   if (reportType === "transaksi") reportName = "transaksi";
   if (reportType === "aset") reportName = "aset";
   if (reportType === "surat") reportName = "surat";
+  if (reportType === "penyusutan") reportName = "penyusutan";
 
   return new NextResponse(buffer, {
     headers: {

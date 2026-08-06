@@ -224,6 +224,20 @@ export default function DepreciationPage() {
 
       <div className="bg-white p-4 sm:p-6 rounded-lg border border-gray-200 mb-6">
         <h2 className="font-semibold text-gray-900 mb-4">Jadwal Penyusutan</h2>
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => window.open(`/api/keuangan/export?format=excel&reportType=penyusutan&year=${selectedYear}`, "_blank")}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition text-sm"
+          >
+            Export Excel
+          </button>
+          <button
+            onClick={() => window.open(`/api/keuangan/export?format=pdf&reportType=penyusutan&year=${selectedYear}`, "_blank")}
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
+          >
+            Export PDF
+          </button>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm min-w-[700px]">
             <thead className="bg-gray-50">
