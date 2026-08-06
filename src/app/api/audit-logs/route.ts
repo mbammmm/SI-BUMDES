@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/api-auth";
+import { requireAuth } from "@/lib/api-auth";
+import { hasPermission, getPermissions } from "@/lib/rbac";
 
 export async function GET(request: Request) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { user, error } = await requireAuth();
+    if (error) return error;
 
     const url = new URL(request.url);
     const entityType = url.searchParams.get("entityType");
@@ -40,11 +39,19 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
+    const userPermissions = user!.role?.permissions as Record<string, any> || {};
+    const permissions = getPermissions(userPermissions);
+
+    if (!hasPermission(permissions, "users:crud")) {
+      return NextResponse.json({ error: "Tidak memiliki akses" }, { status: 403 });
+    }
     const body = await request.json();
     const { action, entityType, entityId, changes, ipAddress, userAgent } = body;
 
-    const user = await getCurrentUser();
-    const userId = user?.id || body.userId || null;
+    const userId = user!.id || body.userId || null;
 
     const log = await prisma.auditLog.create({
       data: {

@@ -9,9 +9,6 @@ out
 dist
 build
 
-# Prisma
-prisma/migrations/
-
 # Environment
 .env
 .env.local
@@ -34,12 +31,8 @@ lerna-debug.log*
 *.swp
 *.swo
 
-# Docker
-.dockerignore
-
 # Misc
 *.log
 coverage
 .nyc_output
 tsconfig.tsbuildinfo
-scripts

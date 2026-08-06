@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireAuth } from "@/lib/api-auth";
+import { hasPermission, getPermissions } from "@/lib/rbac";
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
+    const userPermissions = user!.role?.permissions as Record<string, any> || {};
+    const permissions = getPermissions(userPermissions);
+
+    if (!hasPermission(permissions, "letters:crud")) {
+      return NextResponse.json({ error: "Tidak memiliki akses" }, { status: 403 });
+    }
+    const { id } = await params;
     const body = await request.json();
     const template = await prisma.letterTemplate.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name: body.name,
         type: body.type,
@@ -21,10 +33,20 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
+    const userPermissions = user!.role?.permissions as Record<string, any> || {};
+    const permissions = getPermissions(userPermissions);
+
+    if (!hasPermission(permissions, "letters:crud")) {
+      return NextResponse.json({ error: "Tidak memiliki akses" }, { status: 403 });
+    }
+    const { id } = await params;
     await prisma.letterTemplate.update({
-      where: { id: params.id },
+      where: { id },
       data: { isActive: false },
     });
 

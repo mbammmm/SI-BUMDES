@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/api-auth";
+import { requireAuth } from "@/lib/api-auth";
 import ExcelJS from "exceljs";
 import { generateReportPDF } from "@/lib/report-pdf-generator";
 
@@ -9,10 +9,8 @@ export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { user, error } = await requireAuth();
+    if (error) return error;
 
     const url = new URL(request.url);
     const format = url.searchParams.get("format") || "excel";
