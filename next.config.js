@@ -5,6 +5,9 @@ const nextConfig = {
   images: {
     remotePatterns: [],
   },
+  experimental: {
+    serverActions: false,
+  },
   webpack: (config, { isServer }) => {
     config.cache = false;
     if (isServer) {
