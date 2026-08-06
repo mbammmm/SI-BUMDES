@@ -194,7 +194,16 @@ export default function Navbar() {
   }
 
   function isItemActive(href: string) {
-    return pathname === href;
+    return href === pathname;
+  }
+
+  async function onLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   }
 
   return (
@@ -286,15 +295,13 @@ export default function Navbar() {
               );
             })}
 
-          <form action="/api/auth/logout" method="POST" className="ml-2">
-            <button
-              type="submit"
-              className="flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-1.5 rounded transition"
-            >
-              <LogOut size={16} />
-              <span>Keluar</span>
-            </button>
-          </form>
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-1.5 rounded transition"
+          >
+            <LogOut size={16} />
+            <span>Keluar</span>
+          </button>
         </div>
       </nav>
 
@@ -394,15 +401,13 @@ export default function Navbar() {
               );
             })}
 
-            <form action="/api/auth/logout" method="POST" className="-mx-2">
-              <button
-                type="submit"
-                className="w-full flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-2.5 rounded transition"
-              >
-                <LogOut size={16} />
-                <span>Keluar</span>
-              </button>
-            </form>
+            <button
+              onClick={onLogout}
+              className="w-full flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-2.5 rounded transition"
+            >
+              <LogOut size={16} />
+              <span>Keluar</span>
+            </button>
           </div>
         </div>
       )}
