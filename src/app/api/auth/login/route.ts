@@ -26,10 +26,14 @@ export async function POST(request: Request) {
       );
     }
 
+    const isHttps =
+      request.headers.get("x-forwarded-proto") === "https" ||
+      process.env.NEXTAUTH_URL?.startsWith("https://");
+
     const cookieStore = await cookies();
     cookieStore.set("session", JSON.stringify({ userId: user.id }), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isHttps,
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
