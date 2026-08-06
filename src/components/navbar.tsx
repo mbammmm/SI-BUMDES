@@ -40,6 +40,7 @@ const modulePermissions: Record<string, string> = {
   "/surat": "letters",
   "/arsip": "archives",
   "/aset": "assets",
+  "/aset/penyusutan": "assets",
   "/notifikasi": "notifications",
   "/audit-log": "users",
 };
@@ -93,7 +94,10 @@ const menuGroups = [
   {
     label: "Aset",
     icon: <Package size={16} />,
-    href: "/aset",
+    items: [
+      { href: "/aset", label: "Daftar Aset" },
+      { href: "/aset/penyusutan", label: "Penyusutan" },
+    ],
   },
   {
     label: "Notifikasi",

@@ -161,6 +161,8 @@ async function main() {
     { code: "1200", name: "Piutang", category: "Aset", type: "Debit" },
     { code: "1300", name: "Persediaan", category: "Aset", type: "Debit" },
     { code: "1500", name: "Aset Tetap", category: "Aset", type: "Debit" },
+    { code: "1510", name: "Beban Penyusutan", category: "Beban", type: "Debit" },
+    { code: "1520", name: "Akumulasi Penyusutan", category: "Aset", type: "Kredit" },
     { code: "2000", name: "Liabilitas", category: "Liabilitas", type: "Kredit" },
     { code: "3000", name: "Modal Desa", category: "Ekuitas", type: "Kredit" },
     { code: "3100", name: "Cadangan", category: "Ekuitas", type: "Kredit" },

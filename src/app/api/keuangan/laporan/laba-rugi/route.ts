@@ -20,6 +20,16 @@ export async function GET(request: Request) {
 
     const transactions = await prisma.transaction.findMany({ where });
 
+    const journalEntries = await prisma.journalEntry.findMany({
+      where: {
+        isPosted: true,
+        entryDate: where.transactionDate,
+      },
+      include: {
+        lines: true,
+      },
+    });
+
     const pendapatanAccounts = accounts.filter((a: any) => a.category === "Pendapatan" && a.type === "Kredit");
     const bebanAccounts = accounts.filter((a: any) => a.category === "Beban" && a.type === "Debit");
 
@@ -31,10 +41,19 @@ export async function GET(request: Request) {
     });
 
     const beban = bebanAccounts.map((acc: any) => {
-      const total = transactions
+      const txTotal = transactions
         .filter((t: any) => t.accountCode === acc.code)
         .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
-      return { code: acc.code, name: acc.name, total };
+
+      let journalTotal = 0;
+      if (acc.code === "1510") {
+        journalTotal = journalEntries.reduce((sum: number, entry: any) => {
+          const depLine = entry.lines.find((l: any) => l.accountCode === acc.code);
+          return sum + (depLine ? Number(depLine.debit) : 0);
+        }, 0);
+      }
+
+      return { code: acc.code, name: acc.name, total: txTotal + journalTotal };
     });
 
     const totalPendapatan = pendapatan.reduce((sum: number, item: any) => sum + item.total, 0);

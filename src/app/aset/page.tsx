@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Plus, Package, QrCode } from "lucide-react";
+import { Plus, Package, QrCode, TrendingDown } from "lucide-react";
 import QRCode from "qrcode";
+import Link from "next/link";
 import { usePermission } from "@/hooks/use-permission";
 import { emitRefresh } from "@/lib/refresh";
 import { useRefreshOnEvent } from "@/hooks/use-refresh-on-event";
@@ -138,6 +139,13 @@ export default function AsetPage() {
               Tambah Aset
             </button>
           )}
+          <Link
+            href="/aset/penyusutan"
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition text-sm"
+          >
+            <TrendingDown size={16} />
+            Penyusutan
+          </Link>
           <button
             onClick={() => window.open("/api/keuangan/export?format=excel&reportType=aset", "_blank")}
             className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition text-sm"
