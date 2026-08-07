@@ -139,8 +139,39 @@ model Transaction {
   updatedAt       DateTime @updatedAt
 
   createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  reconciliationItems ReconciliationItem[]
 
   @@map("transactions")
+}
+
+model Reconciliation {
+  id          String   @id @default(cuid())
+  startDate   DateTime
+  endDate     DateTime
+  bankBalance Decimal  @db.Decimal(15, 2) @default(0)
+  status      String   @default("pending")
+  notes       String?
+  createdAt   DateTime @default(now())
+  createdById String
+
+  createdBy   User              @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  items       ReconciliationItem[]
+
+  @@map("reconciliations")
+}
+
+model ReconciliationItem {
+  id            String   @id @default(cuid())
+  reconciliationId String
+  transactionId   String
+  status          String   @default("unmatched")
+  notes           String?
+  createdAt       DateTime @default(now())
+
+  reconciliation  Reconciliation @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+  transaction     Transaction    @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@map("reconciliation_items")
 }
 
 model Asset {
