@@ -311,7 +311,6 @@ model ArchiveDocument {
   updatedAt       DateTime @updatedAt
 
   createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
-  reconciliationItems ReconciliationItem[]
 
   @@map("archive_documents")
 }
