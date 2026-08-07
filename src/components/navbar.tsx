@@ -18,6 +18,7 @@ import {
   X,
   ChevronDown,
   Clock,
+  Database,
 } from "lucide-react";
 
 type User = {
@@ -42,6 +43,7 @@ const modulePermissions: Record<string, string> = {
   "/arsip": "archives",
   "/aset": "assets",
   "/aset/penyusutan": "assets",
+  "/backup": "users",
   "/notifikasi": "notifications",
   "/audit-log": "users",
 };
@@ -111,6 +113,11 @@ const menuGroups = [
     label: "Audit Trail",
     icon: <Clock size={16} />,
     href: "/audit-log",
+  },
+  {
+    label: "Backup",
+    icon: <Database size={16} />,
+    href: "/backup",
   },
 ];
 
