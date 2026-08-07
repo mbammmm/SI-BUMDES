@@ -290,6 +290,8 @@ model DocumentCategory {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  documents   ArchiveDocument[]
+
   @@map("document_categories")
 }
 
@@ -311,6 +313,7 @@ model ArchiveDocument {
   updatedAt       DateTime @updatedAt
 
   createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  category        DocumentCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   @@map("archive_documents")
 }
