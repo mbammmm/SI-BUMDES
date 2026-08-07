@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { hasPermission, getPermissions } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
     const { searchParams } = new URL(request.url);
     const letterId = searchParams.get("letterId");
 
@@ -35,6 +39,12 @@ export async function POST(request: Request) {
     const { user, error } = await requireAuth();
     if (error) return error;
 
+    const userPermissions = user!.role?.permissions as Record<string, any> || {};
+    const permissions = getPermissions(userPermissions);
+
+    if (!hasPermission(permissions, "letters:crud")) {
+      return NextResponse.json({ error: "Tidak memiliki akses" }, { status: 403 });
+    }
     const body = await request.json();
     const { letterId, stepOrder, approverId, status, notes } = body;
 

@@ -18,11 +18,17 @@ type SHUData = {
     cadangan: number;
     danaSosial: number;
     pengembangan: number;
+    allocationPercentages: {
+      pendapatanAsliDesa: number;
+      cadangan: number;
+      danaSosial: number;
+      pengembangan: number;
+    };
   };
 };
 
 export default function SHUPage() {
-  const { allowed, loading } = usePermission({ module: "accounting", minLevel: "read" });
+  const { allowed, canWrite, loading } = usePermission({ module: "accounting", minLevel: "read" });
   const [data, setData] = useState<SHUData | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [startDate, setStartDate] = useState("");
@@ -164,25 +170,43 @@ export default function SHUPage() {
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <PieChart size={18} className="text-primary" />
-          <h2 className="font-semibold text-gray-900">Pembagian SHU</h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <PieChart size={18} className="text-primary" />
+            <h2 className="font-semibold text-gray-900">Pembagian SHU</h2>
+          </div>
+          {canWrite && (
+            <button
+              onClick={() => window.open("/keuangan/shu/pengaturan", "_blank")}
+              className="px-3 py-1.5 text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/10"
+            >
+              Atur Persentase
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-blue-50 rounded-lg p-4">
-            <p className="text-sm text-blue-700 mb-1">Pendapatan Asli Desa (10%)</p>
+            <p className="text-sm text-blue-700 mb-1">
+              Pendapatan Asli Desa ({data.allocation.allocationPercentages?.pendapatanAsliDesa?.toFixed(0) ?? 10}%)
+            </p>
             <p className="text-lg font-bold text-blue-900">{data.allocation.pendapatanAsliDesa.toLocaleString("id-ID")}</p>
           </div>
           <div className="bg-green-50 rounded-lg p-4">
-            <p className="text-sm text-green-700 mb-1">Cadangan (20%)</p>
+            <p className="text-sm text-green-700 mb-1">
+              Cadangan ({data.allocation.allocationPercentages?.cadangan?.toFixed(0) ?? 20}%)
+            </p>
             <p className="text-lg font-bold text-green-900">{data.allocation.cadangan.toLocaleString("id-ID")}</p>
           </div>
           <div className="bg-yellow-50 rounded-lg p-4">
-            <p className="text-sm text-yellow-700 mb-1">Dana Sosial (10%)</p>
+            <p className="text-sm text-yellow-700 mb-1">
+              Dana Sosial ({data.allocation.allocationPercentages?.danaSosial?.toFixed(0) ?? 10}%)
+            </p>
             <p className="text-lg font-bold text-yellow-900">{data.allocation.danaSosial.toLocaleString("id-ID")}</p>
           </div>
           <div className="bg-primary/10 rounded-lg p-4">
-            <p className="text-sm text-primary mb-1">Pengembangan (60%)</p>
+            <p className="text-sm text-primary mb-1">
+              Pengembangan ({data.allocation.allocationPercentages?.pengembangan?.toFixed(0) ?? 60}%)
+            </p>
             <p className="text-lg font-bold text-primary">{data.allocation.pengembangan.toLocaleString("id-ID")}</p>
           </div>
         </div>

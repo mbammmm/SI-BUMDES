@@ -11,7 +11,8 @@
     "db:generate": "prisma migrate dev --name init",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "db:seed": "tsx prisma/seed.ts",
+    "db:migrate:deploy": "prisma migrate deploy"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
@@ -20,13 +21,15 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@tanstack/react-query": "^5.83.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/nodemailer": "^8.0.1",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "dexie": "^4.0.10",
     "exceljs": "^4.4.0",
     "lucide-react": "^0.511.0",
-    "next": "^14.2.35",
+    "next": "^15.5.11",
+    "nodemailer": "^9.0.4",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -37,17 +40,22 @@
   "devDependencies": {
     "@types/node": "^22.15.0",
     "@types/qrcode": "^1.5.5",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^13.5.11",
+    "eslint-config-next": "^15.5.11",
+    "eslint-plugin-react": "^7.36.0",
     "postcss": "^8.5.0",
     "prisma": "^6.19.3",
     "tailwindcss": "^4.1.0",
     "tsx": "^4.19.0",
     "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
   }
 }

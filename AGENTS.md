@@ -10,7 +10,9 @@ Dokumen ini berisi standar kerja & aturan wajib bagi AI Agent (Kilo AI) di repos
 - **Database:** PostgreSQL — sekarang jalan lokal di Windows (installer resmi atau Docker Desktop/WSL2). Saat deploy ke VPS, database diinstal ulang sebagai service Linux dan skema dibuat lewat `prisma migrate deploy` — **bukan** hasil copy file database dari Windows.
 - **Project Type:** Web Application berbasis Next.js (TypeScript, App Router) — PWA dengan dukungan mode offline (kerja offline + sinkronisasi otomatis saat koneksi tersedia lagi).
 - **Dokumen Acuan Wajib:** Sebelum mengerjakan tugas apa pun, agent **WAJIB** membaca `PRD_Sistem_Informasi_BUMDes.md` (dan `SCHEMA.md` jika sudah tersedia) sebagai acuan kebutuhan fungsional, hak akses per peran, dan struktur data. Jangan berasumsi sendiri jika ada di PRD.
-- Gunakan environment variables (`.env`) untuk data sensitif (`DATABASE_URL`, secret auth, dll). Jangan pernah simpan kredensial/API key langsung di dalam kode.
+Use environment variables (`.env`) untuk data sensitif (`DATABASE_URL`, secret auth, dll). Jangan pernah simpan kredensial/API key langsung di dalam kode.
+
+- Email notifikasi opsional: konfigurasi via variabel `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `EMAIL_FROM` di `.env`. Jika `SMTP_HOST` tidak diisi, sistem notifikasi tetap berfungsi via in-app notifications saja.
 
 ---
 
@@ -46,3 +48,13 @@ Dokumen ini berisi standar kerja & aturan wajib bagi AI Agent (Kilo AI) di repos
 - ❌ Dilarang mengubah struktur folder utama aplikasi tanpa instruksi spesifik.
 - ❌ Dilarang menghapus atau melewati (bypass) pencatatan audit trail dan pengecekan RBAC demi mempercepat pengerjaan fitur.
 - ❌ Dilarang mengubah `schema.prisma` yang sudah berjalan di production tanpa membuat migration terpisah yang aman (tidak boleh menyebabkan kehilangan data).
+
+---
+
+## 5. Database Backup & Cron
+- Setiap VPS deployment wajib memiliki script backup database otomatis harian.
+- Script backup: `scripts/backup-db.sh` (Linux) — melakukan `pg_dump` dan kompresi gzip.
+- Setup cron: jalankan `bash scripts/setup-cron.sh` di VPS untuk menambahkan job harian pukul 02:00.
+- Backup disimpan di `/var/backups/si-bumdes/` dan otomatis dihapus setelah 30 hari.
+- Untuk trigger manual backup via UI: login sebagai Admin Sistem, buka `/backup`.
+- CRITICAL: Jalankan `npx prisma generate` dan `npx prisma migrate deploy` setelah pull sebelum build & restart.

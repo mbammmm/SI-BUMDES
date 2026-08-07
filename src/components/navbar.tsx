@@ -18,6 +18,7 @@ import {
   X,
   ChevronDown,
   Clock,
+  Database,
 } from "lucide-react";
 
 type User = {
@@ -37,9 +38,12 @@ const modulePermissions: Record<string, string> = {
   "/master/pengguna": "users",
   "/master/roles": "users",
   "/keuangan": "accounting",
+  "/keuangan/rekonsiliasi": "accounting",
   "/surat": "letters",
   "/arsip": "archives",
   "/aset": "assets",
+  "/aset/penyusutan": "assets",
+  "/backup": "users",
   "/notifikasi": "notifications",
   "/audit-log": "users",
 };
@@ -74,6 +78,7 @@ const menuGroups = [
       { href: "/keuangan/laporan/neraca", label: "Neraca" },
       { href: "/keuangan/laporan/laba-rugi", label: "Laba Rugi" },
       { href: "/keuangan/laporan/arus-kas", label: "Arus Kas" },
+      { href: "/keuangan/rekonsiliasi", label: "Rekonsiliasi" },
       { href: "/keuangan/shu", label: "SHU" },
     ],
   },
@@ -93,7 +98,10 @@ const menuGroups = [
   {
     label: "Aset",
     icon: <Package size={16} />,
-    href: "/aset",
+    items: [
+      { href: "/aset", label: "Daftar Aset" },
+      { href: "/aset/penyusutan", label: "Penyusutan" },
+    ],
   },
   {
     label: "Notifikasi",
@@ -105,6 +113,11 @@ const menuGroups = [
     label: "Audit Trail",
     icon: <Clock size={16} />,
     href: "/audit-log",
+  },
+  {
+    label: "Backup",
+    icon: <Database size={16} />,
+    href: "/backup",
   },
 ];
 
@@ -194,7 +207,16 @@ export default function Navbar() {
   }
 
   function isItemActive(href: string) {
-    return pathname === href;
+    return href === pathname;
+  }
+
+  async function onLogout() {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   }
 
   return (
@@ -286,15 +308,13 @@ export default function Navbar() {
               );
             })}
 
-          <form action="/api/auth/logout" method="POST" className="ml-2">
-            <button
-              type="submit"
-              className="flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-1.5 rounded transition"
-            >
-              <LogOut size={16} />
-              <span>Keluar</span>
-            </button>
-          </form>
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-1.5 rounded transition"
+          >
+            <LogOut size={16} />
+            <span>Keluar</span>
+          </button>
         </div>
       </nav>
 
@@ -394,15 +414,13 @@ export default function Navbar() {
               );
             })}
 
-            <form action="/api/auth/logout" method="POST" className="-mx-2">
-              <button
-                type="submit"
-                className="w-full flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-2.5 rounded transition"
-              >
-                <LogOut size={16} />
-                <span>Keluar</span>
-              </button>
-            </form>
+            <button
+              onClick={onLogout}
+              className="w-full flex items-center gap-1 text-sm hover:bg-primary/80 px-3 py-2.5 rounded transition"
+            >
+              <LogOut size={16} />
+              <span>Keluar</span>
+            </button>
           </div>
         </div>
       )}

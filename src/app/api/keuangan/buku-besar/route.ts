@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/api-auth";
+import { requireAuth } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const { user, error } = await requireAuth();
+    if (error) return error;
 
     const url = new URL(request.url);
     const accountId = url.searchParams.get("accountId");

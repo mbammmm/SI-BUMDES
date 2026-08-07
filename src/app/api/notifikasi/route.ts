@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/api-auth";
+import { sendEmail, generateApprovalEmailHtml } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -96,7 +97,7 @@ export async function POST(request: Request) {
           role: { name: body.roleName },
           isActive: true,
         },
-        select: { id: true },
+        select: { id: true, email: true, name: true },
       });
       
       if (usersInRole.length === 0) {
@@ -112,6 +113,15 @@ export async function POST(request: Request) {
             type: body.type || "info",
           },
         });
+
+        if (u.email && process.env.SMTP_HOST && process.env.SMTP_HOST !== "localhost") {
+          const html = generateApprovalEmailHtml(body.title, body.message);
+          await sendEmail({
+            to: u.email,
+            subject: body.title,
+            html,
+          });
+        }
       }
       
       return NextResponse.json({ ok: true, count: usersInRole.length });
@@ -121,16 +131,31 @@ export async function POST(request: Request) {
       targetUserId = user!.id;
     }
 
-    const notification = await prisma.notification.create({
-      data: {
-        userId: targetUserId,
-        title: body.title,
-        message: body.message,
-        type: body.type || "info",
-      },
-    });
+     const notification = await prisma.notification.create({
+       data: {
+         userId: targetUserId,
+         title: body.title,
+         message: body.message,
+         type: body.type || "info",
+       },
+      });
 
-    return NextResponse.json({ data: notification });
+      Promise.resolve().then(async () => {
+        const user = await prisma.user.findUnique({
+          where: { id: targetUserId },
+          select: { email: true, name: true },
+        });
+        if (user?.email && process.env.SMTP_HOST && process.env.SMTP_HOST !== "localhost") {
+          const html = generateApprovalEmailHtml(body.title, body.message);
+          await sendEmail({
+            to: user.email,
+            subject: body.title,
+            html,
+          });
+       }
+     });
+
+     return NextResponse.json({ data: notification });
   } catch (error) {
     console.error("Error creating notification:", error);
     return NextResponse.json({ error: "Gagal membuat notifikasi" }, { status: 500 });

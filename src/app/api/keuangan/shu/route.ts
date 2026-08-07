@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireAuth } from "@/lib/api-auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
     const { searchParams } = new URL(request.url);
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
@@ -86,11 +90,33 @@ export async function GET(request: Request) {
 
     const shu = totalRevenue - totalExpense;
 
+    const settings = await prisma.shuAllocationSetting.findMany({
+      where: {
+        name: { in: ["pendapatan_asli_desa", "cadangan", "dana_sosial", "pengembangan"] },
+      },
+    });
+
+    const percentageMap: Record<string, number> = {};
+    for (const s of settings) {
+      percentageMap[s.name] = s.percentage / 100;
+    }
+
+    const p1 = percentageMap["pendapatan_asli_desa"] ?? 0.10;
+    const p2 = percentageMap["cadangan"] ?? 0.20;
+    const p3 = percentageMap["dana_sosial"] ?? 0.10;
+    const p4 = percentageMap["pengembangan"] ?? 0.60;
+
     const allocation = {
-      pendapatanAsliDesa: shu * 0.10,
-      cadangan: shu * 0.20,
-      danaSosial: shu * 0.10,
-      pengembangan: shu * 0.60,
+      pendapatanAsliDesa: shu * p1,
+      cadangan: shu * p2,
+      danaSosial: shu * p3,
+      pengembangan: shu * p4,
+      allocationPercentages: {
+        pendapatanAsliDesa: p1 * 100,
+        cadangan: p2 * 100,
+        danaSosial: p3 * 100,
+        pengembangan: p4 * 100,
+      },
     };
 
     return NextResponse.json({

@@ -7,11 +7,56 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
     const { searchParams } = new URL(request.url);
     const categoryId = searchParams.get("categoryId");
+    const expiringSoon = searchParams.get("expiringSoon");
+    const expired = searchParams.get("expired");
+
+    if (expiringSoon === "true" || expired === "true") {
+      const now = new Date();
+      const threeMonthsFromNow = new Date();
+      threeMonthsFromNow.setMonth(now.getMonth() + 3);
+
+      const where: any = {
+        isDeleted: false,
+        expiryDate: { not: null },
+      };
+
+      if (expiringSoon === "true") {
+        where.expiryDate = {
+          gte: now,
+          lte: threeMonthsFromNow,
+        };
+      }
+
+      if (expired === "true") {
+        where.expiryDate = {
+          lt: now,
+        };
+      }
+
+      const documents = await prisma.archiveDocument.findMany({
+        where,
+        include: {
+          createdBy: {
+            select: { name: true },
+          },
+          category: {
+            select: { name: true },
+          },
+        },
+        orderBy: { expiryDate: expiringSoon === "true" ? "asc" : "desc" },
+      });
+
+      return NextResponse.json({ data: documents });
+    }
 
     const where: any = {};
     if (categoryId) where.categoryId = categoryId;
+    where.isDeleted = false;
 
     const documents = await prisma.archiveDocument.findMany({
       where,
@@ -44,6 +89,25 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+
+    let retentionDays = body.retentionDays;
+    let expiryDate: Date | null = null;
+
+    if (body.categoryId && !retentionDays) {
+      const category = await prisma.documentCategory.findUnique({
+        where: { id: body.categoryId },
+        select: { retentionDays: true },
+      });
+      if (category?.retentionDays) {
+        retentionDays = category.retentionDays;
+      }
+    }
+
+    if (retentionDays) {
+      expiryDate = new Date(body.documentDate);
+      expiryDate.setDate(expiryDate.getDate() + Number(retentionDays));
+    }
+
     const document = await prisma.archiveDocument.create({
       data: {
         title: body.title,
@@ -53,6 +117,8 @@ export async function POST(request: Request) {
         filePath: body.filePath,
         relatedLetterId: body.relatedLetterId,
         relatedTransactionId: body.relatedTransactionId,
+        retentionDays: retentionDays ? Number(retentionDays) : undefined,
+        expiryDate,
         createdById: user!.id,
       },
       include: {

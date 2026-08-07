@@ -1,6 +1,6 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -29,6 +29,7 @@ model User {
   archives      ArchiveDocument[]
   notifications Notification[]
   approvalSteps ApprovalStep[]     @relation("ApprovalSteps")
+  reconciliations Reconciliation[]
 
   @@map("users")
 }
@@ -139,8 +140,39 @@ model Transaction {
   updatedAt       DateTime @updatedAt
 
   createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  reconciliationItems ReconciliationItem[]
 
   @@map("transactions")
+}
+
+model Reconciliation {
+  id          String   @id @default(cuid())
+  startDate   DateTime
+  endDate     DateTime
+  bankBalance Decimal  @db.Decimal(15, 2) @default(0)
+  status      String   @default("pending")
+  notes       String?
+  createdAt   DateTime @default(now())
+  createdById String
+
+  createdBy   User              @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  items       ReconciliationItem[]
+
+  @@map("reconciliations")
+}
+
+model ReconciliationItem {
+  id            String   @id @default(cuid())
+  reconciliationId String
+  transactionId   String
+  status          String   @default("unmatched")
+  notes           String?
+  createdAt       DateTime @default(now())
+
+  reconciliation  Reconciliation @relation(fields: [reconciliationId], references: [id], onDelete: Cascade)
+  transaction     Transaction    @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@map("reconciliation_items")
 }
 
 model Asset {
@@ -258,6 +290,8 @@ model DocumentCategory {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  documents   ArchiveDocument[]
+
   @@map("document_categories")
 }
 
@@ -270,6 +304,8 @@ model ArchiveDocument {
   filePath        String
   relatedLetterId String?
   relatedTransactionId String?
+  retentionDays   Int?
+  expiryDate      DateTime?
   isDeleted       Boolean  @default(false)
   deletedAt       DateTime?
   createdAt       DateTime @default(now())
@@ -277,6 +313,7 @@ model ArchiveDocument {
   updatedAt       DateTime @updatedAt
 
   createdBy       User     @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  category        DocumentCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   @@map("archive_documents")
 }
@@ -323,4 +360,16 @@ model SyncQueue {
   processedAt DateTime?
 
   @@map("sync_queue")
+}
+
+/// Stores configurable SHU allocation percentages
+model ShuAllocationSetting {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  percentage  Float
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("shu_allocation_settings")
 }

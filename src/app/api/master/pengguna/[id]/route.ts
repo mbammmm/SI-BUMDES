@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireAuth } from "@/lib/api-auth";
+import { hasPermission, getPermissions } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
@@ -12,7 +17,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "ID diperlukan" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
+    const userData = await prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
@@ -28,11 +33,11 @@ export async function GET(request: Request) {
       },
     });
 
-    if (!user) {
+    if (!userData) {
       return NextResponse.json({ error: "Pengguna tidak ditemukan" }, { status: 404 });
     }
 
-    return NextResponse.json({ data: user });
+    return NextResponse.json({ data: userData });
   } catch (error) {
     console.error("Error fetching user:", error);
     return NextResponse.json({ error: "Gagal memuat pengguna" }, { status: 500 });
@@ -41,6 +46,15 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
+    const userPermissions = user!.role?.permissions as Record<string, any> || {};
+    const permissions = getPermissions(userPermissions);
+
+    if (!hasPermission(permissions, "users:crud")) {
+      return NextResponse.json({ error: "Tidak memiliki akses" }, { status: 403 });
+    }
     const body = await request.json();
     const { id, name, email, roleId, isActive, password } = body;
 
@@ -54,7 +68,7 @@ export async function PUT(request: Request) {
       updateData.passwordHash = await hashPassword(password);
     }
 
-    const user = await prisma.user.update({
+    const userData = await prisma.user.update({
       where: { id },
       data: updateData,
       select: {
@@ -77,6 +91,15 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const { user, error } = await requireAuth();
+    if (error) return error;
+
+    const userPermissions = user!.role?.permissions as Record<string, any> || {};
+    const permissions = getPermissions(userPermissions);
+
+    if (!hasPermission(permissions, "users:crud")) {
+      return NextResponse.json({ error: "Tidak memiliki akses" }, { status: 403 });
+    }
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 

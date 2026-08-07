@@ -115,6 +115,33 @@ export async function generateReportPDF({ reportType, data, startDate, endDate, 
           </>
         )}
 
+        {reportType === "penyusutan" && (
+          <>
+            <View style={styles.tableHeader}>
+              <Text style={{ ...styles.tableHeaderCell, flex: 0.5 }}>No</Text>
+              <Text style={{ ...styles.tableHeaderCell, flex: 2 }}>Nama Aset</Text>
+              <Text style={styles.tableHeaderCell}>Kategori</Text>
+              <Text style={styles.tableHeaderCell}>Periode</Text>
+              <Text style={styles.tableHeaderCell}>Jumlah Penyusutan</Text>
+              <Text style={styles.tableHeaderCell}>Status</Text>
+            </View>
+            {data.slice(0, 25).map((item: any, i: number) => (
+              <View key={item.id || i} style={styles.tableRow}>
+                <Text style={{ ...styles.tableCell, flex: 0.5 }}>{i + 1}</Text>
+                <Text style={{ ...styles.tableCell, flex: 2 }}>{item.asset?.name || "-"}</Text>
+                <Text style={styles.tableCell}>{item.asset?.category || "-"}</Text>
+                <Text style={styles.tableCell}>{item.period || "-"}</Text>
+                <Text style={styles.tableCell}>
+                  {item.amount ? Number(item.amount).toLocaleString("id-ID") : "-"}
+                </Text>
+                <Text style={styles.tableCell}>
+                  {item.isAccrued ? "Diterapkan" : "Draft"}
+                </Text>
+              </View>
+            ))}
+          </>
+        )}
+
         {data.length > 25 && (
           <Text style={styles.label}>... dan {data.length - 25} data lagi</Text>
         )}
