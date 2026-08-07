@@ -361,3 +361,15 @@ model SyncQueue {
 
   @@map("sync_queue")
 }
+
+/// Stores configurable SHU allocation percentages
+model ShuAllocationSetting {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  percentage  Float
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("shu_allocation_settings")
+}

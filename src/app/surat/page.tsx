@@ -91,11 +91,18 @@ export default function SuratPage() {
     setSaving(true);
     setMessage("");
 
-    const res = await offlineFetch("/api/surat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    let res: Response;
+    try {
+      res = await offlineFetch("/api/surat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+    } catch (error) {
+      setMessage("Gagal menyimpan surat: " + (error instanceof Error ? error.message : "Network error"));
+      setSaving(false);
+      return;
+    }
 
     if (res.ok) {
       const json = await res.json();
@@ -142,33 +149,40 @@ export default function SuratPage() {
   }
 
   async function approveStep(approvalId: string, status: "approved" | "rejected", notes: string) {
-    const approvalRes = await fetch(`/api/surat/approval?letterId=${selectedLetter?.id}`);
-    const approvalJson = await approvalRes.json();
-    const approvals = approvalJson.data || [];
-    const currentApproval = approvals.find((a: any) => a.id === approvalId);
-    const approverId = currentApproval?.approverId;
+    let approvalJson: any;
+    try {
+      const approvalRes = await fetch(`/api/surat/approval?letterId=${selectedLetter?.id}`);
+      approvalJson = await approvalRes.json();
 
-    let approverRole = "Direktur/Ketua BUMDes";
-    if (approverId) {
-      const userRes = await fetch(`/api/master/pengguna`);
-      const userJson = await userRes.json();
-      const approver = (userJson.data || []).find((u: any) => u.id === approverId);
-      approverRole = approver?.role?.name || approverRole;
+      const approvals = approvalJson.data || [];
+      const currentApproval = approvals.find((a: any) => a.id === approvalId);
+      const approverId = currentApproval?.approverId;
+
+      let approverRole = "Direktur/Ketua BUMDes";
+      if (approverId) {
+        const userRes = await fetch(`/api/master/pengguna`);
+        const userJson = await userRes.json();
+        const approver = (userJson.data || []).find((u: any) => u.id === approverId);
+        approverRole = approver?.role?.name || approverRole;
+      }
+
+      await offlineFetch("/api/surat/approval", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: approvalId, status, notes }),
+      });
+
+      if (selectedLetter) {
+        const statusText = status === "approved" ? "disetujui" : "ditolak";
+        await notifyRole(approverRole, `Surat ${statusText}`, `Surat "${selectedLetter.subject}" telah ${statusText} oleh approver.`, status === "approved" ? "success" : "warning");
+      }
+
+      await loadData();
+      emitRefresh();
+    } catch (error) {
+      console.error("Approval error:", error);
+      setMessage("Gagal memproses approval: " + (error instanceof Error ? error.message : String(error)));
     }
-
-    await offlineFetch("/api/surat/approval", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: approvalId, status, notes }),
-    });
-
-    if (selectedLetter) {
-      const statusText = status === "approved" ? "disetujui" : "ditolak";
-      await notifyRole(approverRole, `Surat ${statusText}`, `Surat "${selectedLetter.subject}" telah ${statusText} oleh approver.`, status === "approved" ? "success" : "warning");
-    }
-
-    await loadData();
-    emitRefresh();
   }
 
   if (dataLoading) return <div className="p-6">Memuat...</div>;

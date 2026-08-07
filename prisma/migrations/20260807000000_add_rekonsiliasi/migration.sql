@@ -14,8 +14,8 @@ CREATE TABLE "reconciliations" (
 -- CreateTable
 CREATE TABLE "reconciliation_items" (
     "id" TEXT NOT NULL,
-    "reconciliationId" TEXT NOT NULL,
-    "transactionId" TEXT NOT NULL,
+    "reconciliationId" TEXT,
+    "transactionId" TEXT,
     "status" TEXT NOT NULL DEFAULT 'unmatched',
     "notes" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -27,8 +27,10 @@ CREATE UNIQUE INDEX "reconciliations_pkey" ON "reconciliations"("id");
 -- CreateIndex
 CREATE UNIQUE INDEX "reconciliation_items_pkey" ON "reconciliation_items"("id");
 
--- AddForeignKey
+-- AddForeignKey (after both tables exist)
 ALTER TABLE "reconciliation_items" ADD CONSTRAINT "reconciliation_items_reconciliationId_fkey" FOREIGN KEY ("reconciliationId") REFERENCES "reconciliations"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
 
--- AddForeignKey
 ALTER TABLE "reconciliation_items" ADD CONSTRAINT "reconciliation_items_transactionId_fkey" FOREIGN KEY ("transactionId") REFERENCES "transactions"("id") ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- Add relation column to users table
+-- (Prisma handles relation counters via metadata, no schema change needed here)
