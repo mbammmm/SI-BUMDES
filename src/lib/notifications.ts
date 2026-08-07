@@ -1,3 +1,5 @@
+import { sendEmail, generateApprovalEmailHtml } from "./email";
+
 export async function createNotification(params: {
   userId?: string;
   roleName?: string;
@@ -38,4 +40,22 @@ export async function notifyRole(roleName: string, title: string, message: strin
 
 export async function notifyUser(userId: string, title: string, message: string, type?: "info" | "success" | "warning" | "approval") {
   return createNotification({ userId, title, message, type });
+}
+
+export async function notifyUserWithEmail(userId: string, title: string, message: string, type?: "info" | "success" | "warning" | "approval", actionUrl?: string) {
+  await createNotification({ userId, title, message, type });
+
+  const userRes = await fetch(`/api/master/pengguna/${userId}`);
+  if (userRes.ok) {
+    const json = await userRes.json();
+    const user = json.data;
+    if (user?.email) {
+      const html = generateApprovalEmailHtml(title, message, actionUrl);
+      await sendEmail({
+        to: user.email,
+        subject: title,
+        html,
+      });
+    }
+  }
 }

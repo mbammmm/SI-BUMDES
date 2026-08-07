@@ -10,7 +10,9 @@ Dokumen ini berisi standar kerja & aturan wajib bagi AI Agent (Kilo AI) di repos
 - **Database:** PostgreSQL — sekarang jalan lokal di Windows (installer resmi atau Docker Desktop/WSL2). Saat deploy ke VPS, database diinstal ulang sebagai service Linux dan skema dibuat lewat `prisma migrate deploy` — **bukan** hasil copy file database dari Windows.
 - **Project Type:** Web Application berbasis Next.js (TypeScript, App Router) — PWA dengan dukungan mode offline (kerja offline + sinkronisasi otomatis saat koneksi tersedia lagi).
 - **Dokumen Acuan Wajib:** Sebelum mengerjakan tugas apa pun, agent **WAJIB** membaca `PRD_Sistem_Informasi_BUMDes.md` (dan `SCHEMA.md` jika sudah tersedia) sebagai acuan kebutuhan fungsional, hak akses per peran, dan struktur data. Jangan berasumsi sendiri jika ada di PRD.
-- Gunakan environment variables (`.env`) untuk data sensitif (`DATABASE_URL`, secret auth, dll). Jangan pernah simpan kredensial/API key langsung di dalam kode.
+Use environment variables (`.env`) untuk data sensitif (`DATABASE_URL`, secret auth, dll). Jangan pernah simpan kredensial/API key langsung di dalam kode.
+
+- Email notifikasi opsional: konfigurasi via variabel `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `EMAIL_FROM` di `.env`. Jika `SMTP_HOST` tidak diisi, sistem notifikasi tetap berfungsi via in-app notifications saja.
 
 ---
 
