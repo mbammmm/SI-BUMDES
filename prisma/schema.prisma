@@ -29,6 +29,7 @@ model User {
   archives      ArchiveDocument[]
   notifications Notification[]
   approvalSteps ApprovalStep[]     @relation("ApprovalSteps")
+  reconciliations Reconciliation[]
 
   @@map("users")
 }
